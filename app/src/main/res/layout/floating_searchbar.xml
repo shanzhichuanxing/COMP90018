@@ -33,7 +33,8 @@
                 android:layout_weight="1"
                 android:src="@android:drawable/ic_search_category_default"
                 android:visibility="visible"
-                app:srcCompat="@android:drawable/ic_search_category_default" />
+                app:srcCompat="@android:drawable/ic_search_category_default"
+                app:tint="@color/teal_200"/>
 
             <TextView
                 android:id="@+id/searchBox"
@@ -42,7 +43,8 @@
                 android:layout_weight="5"
                 android:ellipsize="start"
                 android:gravity="center_vertical"
-                android:hint="Search for location..." />
+                android:hint="Search for location..."
+                app:backgroundTint="@color/teal_200"/>
 
         </LinearLayout>
 

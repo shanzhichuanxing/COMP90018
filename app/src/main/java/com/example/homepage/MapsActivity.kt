@@ -1,5 +1,6 @@
 package com.example.homepage
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.os.trace
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -30,6 +32,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var levelTwoBtn:View
     private lateinit var levelOneBtn:View
     private lateinit var layerButton:View
+    private lateinit var traceMenuButton:View
+    private lateinit var reCenterButton:View
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -45,6 +49,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
+
+        traceMenuButton = findViewById(R.id.traceMenu)
+        traceMenuButton.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this@MapsActivity, TraceActivity::class.java)
+            startActivity(intent)
+        })
 
         layerButton.setOnClickListener{
             onAddButtonClicked()
