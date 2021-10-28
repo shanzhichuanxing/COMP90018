@@ -18,7 +18,12 @@
         android:layout_width="401dp"
         android:layout_height="match_parent"
         tools:visibility="visible">
-        <include layout="@layout/floating_searchbar" />
+
+        <include
+            layout="@layout/floating_searchbar"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="-16dp" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/levelTwoBtn"
             android:layout_width="wrap_content"
@@ -91,6 +96,18 @@
             app:srcCompat="@drawable/relocate"
             app:tint="@null"
             android:focusable="true" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/traceMenu"
+            android:layout_width="36dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="348dp"
+            android:layout_marginBottom="536dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/trace"
+            app:tint="@null" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 <!--    <include layout="@layout/marker_info_contents" />-->
