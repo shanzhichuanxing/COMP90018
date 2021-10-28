@@ -18,12 +18,18 @@
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/drawable-anydpi/tier1.xml" value="0.1625" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/drawable-anydpi/tier2.xml" value="0.15989583333333332" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/drawable-anydpi/tier3.xml" value="0.15989583333333332" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_case_alert.xml" value="0.275" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_maps.xml" value="0.14375" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/content_case_alert.xml" value="0.14375" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/demo1.xml" value="0.14375" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/demo2.xml" value="0.14375" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/demo_maps.xml" value="0.14375" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/floating_searchbar.xml" value="0.14375" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/fragment_first.xml" value="0.14375" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/fragment_second.xml" value="0.14375" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/marker_info_contents.xml" value="0.2713541666666667" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.15989583333333332" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.15989583333333332" />
       </map>
     </option>
   </component>

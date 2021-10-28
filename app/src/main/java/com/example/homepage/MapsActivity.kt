@@ -1,6 +1,7 @@
 package com.example.homepage
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -33,13 +34,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private val TAG = "MapsActivity"
+    private var places = ArrayList<Place>()
 
     private lateinit var levelThreeBtn:View
     private lateinit var levelTwoBtn:View
     private lateinit var levelOneBtn:View
     private lateinit var layerButton:View
 
-    private var data = mockData()
+    private var data = CaseAlert().getCases();
     var myMarkers = ArrayList<Marker>()
 
     private val alertOneIcon: BitmapDescriptor by lazy {
@@ -163,55 +165,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
     }
 
-    private fun addMarker(place: Place) {
-        when (place.alert_level) {
-            1 -> {
-                val marker = mMap.addMarker(
-                    MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertOneIcon)
-                )
-                marker.tag = place
-            }
-            2 -> {
-                val marker = mMap.addMarker(
-                    MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertTwoIcon)
-                )
-                marker.tag = place
-            }
-            3 -> {
-                val marker = mMap.addMarker(
-                    MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertThreeIcon)
-                )
-                // Set place as the tag on the marker object so it can be referenced within
-                // MarkerInfoWindowAdapter
-                marker.tag = place
-            }
-        }
-    }
-
     /**
      * Adds marker representations of the places list on the provided GoogleMap object
      */
     private fun addMarkers() {
 
-        var places = ArrayList<Place>()
-
-        data.forEach{ case ->
+        data?.forEach{ case ->
             var alert_level = 0
-            when (case[3]) {
-                "Tier 1" -> { alert_level = 1 }
-                "Tier 2" -> { alert_level = 2 }
-                "Tier 3" -> { alert_level = 3 }
+            when (case.adviceTitle) {
+                "Tier1" -> { alert_level = 1 }
+                "Tier2" -> { alert_level = 2 }
+                "Tier3" -> { alert_level = 3 }
             }
-            places.add(Place(case[0], addressToLocation.getLocationFromAddress(this, case[0]), case[2], alert_level))
+            Log.d(TAG, alert_level.toString())
+            places.add(
+                Place(
+                    case.siteTitle,
+                    addressToLocation.getLocationFromAddress(this, case.siteTitle + ", " + case.siteStreet),
+                    case.siteStreet + ", " + case.siteState + " " + case.sitePostcode,
+                    alert_level
+                )
+            )
         }
 
         places.forEach{ place ->
@@ -254,30 +228,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             }
         }
-    }
 
-    private fun mockData(): List<List<String>> {
-        //listOf("Site_title", "Site_state", "Site_address", "advice_title")
-        return listOf(
-            listOf(
-                "Hardrock Climbing | Melbourne CBD",
-                "VIC",
-                "123 test road",
-                "Tier 1"
-            ),
-            listOf(
-                "EQ Tower",
-                "VIC",
-                "123 test road",
-                "Tier 2"
-            ),
-            listOf(
-                "BIG W Queen Victoria Village",
-                "VIC",
-                "123 test road",
-                "Tier 3"
-            )
-        )
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(places[0].latLng, 15f))
     }
 }
 

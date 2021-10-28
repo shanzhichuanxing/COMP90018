@@ -45,7 +45,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/danger"
-            app:tint="@null" />
+            app:tint="@null"
+            android:focusable="true" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/levelOneBtn"
@@ -88,17 +89,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/relocate"
-            app:tint="@null"/>
+            app:tint="@null"
+            android:focusable="true" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="visible">
-
-    </LinearLayout>
+<!--    <include layout="@layout/marker_info_contents" />-->
 
 
 </RelativeLayout>
