@@ -7,10 +7,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.os.trace
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -22,10 +19,8 @@ import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
-import com.example.homepage.utils.addressToLocation
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
@@ -46,21 +41,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var traceMenuButton:View
     private lateinit var reCenterButton:View
 
-    private var data = CaseAlert().getCases();
     var myMarkers = ArrayList<Marker>()
 
     private val alertOneIcon: BitmapDescriptor by lazy {
-        val color = ContextCompat.getColor(this, R.color.red)
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
     }
 
     private val alertTwoIcon: BitmapDescriptor by lazy {
-        val color = ContextCompat.getColor(this, R.color.orange)
         BitmapHelper.vectorToBitmap(this, R.drawable.tier2)
     }
 
     private val alertThreeIcon: BitmapDescriptor by lazy {
-        val color = ContextCompat.getColor(this, R.color.blue)
         BitmapHelper.vectorToBitmap(this, R.drawable.tier3)
     }
 
@@ -182,23 +173,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     private fun addMarkers() {
 
-        data?.forEach{ case ->
-            var alert_level = 0
-            when (case.adviceTitle) {
-                "Tier1" -> { alert_level = 1 }
-                "Tier2" -> { alert_level = 2 }
-                "Tier3" -> { alert_level = 3 }
-            }
-            Log.d(TAG, alert_level.toString())
-            places.add(
-                Place(
-                    case.siteTitle,
-                    addressToLocation.getLocationFromAddress(this, case.siteTitle + ", " + case.siteStreet),
-                    case.siteStreet + ", " + case.siteState + " " + case.sitePostcode,
-                    alert_level
-                )
-            )
-        }
+        places = CaseAlert().getPlaces(this)!!;
 
         places.forEach{ place ->
             when (place.alert_level) {
@@ -240,6 +215,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             }
         }
+        Log.i(TAG, "addMarkers completed")
     }
 }
 

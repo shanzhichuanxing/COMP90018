@@ -1,14 +1,11 @@
 package com.example.homepage
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
 import com.example.homepage.model.Case
-import android.os.Bundle
-import android.os.Handler
 import android.util.Log
-import java.io.BufferedReader
+import com.example.homepage.model.Place
+import com.example.homepage.utils.addressToLocation
 import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 import java.util.ArrayList
 import java.util.concurrent.Executors
@@ -16,6 +13,29 @@ import java.util.concurrent.TimeUnit
 
 class CaseAlert {
     private var cases: ArrayList<Case>? = null
+
+    fun getPlaces(context: Context): ArrayList<Place>? {
+        var places = ArrayList<Place>()
+        cases = getCases()
+
+        cases?.forEach{ case ->
+            var alert_level = 0
+            when (case.adviceTitle) {
+                "Tier1" -> { alert_level = 1 }
+                "Tier2" -> { alert_level = 2 }
+                "Tier3" -> { alert_level = 3 }
+            }
+            places.add(
+                Place(
+                    case.siteTitle,
+                    addressToLocation.getLocationFromAddress(context, case.siteTitle + ", " + case.siteStreet),
+                    case.siteStreet + ", " + case.siteState + " " + case.sitePostcode,
+                    alert_level
+                )
+            )
+        }
+        return places
+    }
 
     fun getCases(): ArrayList<Case>? {
 
@@ -33,7 +53,7 @@ class CaseAlert {
         val scheduler = Executors.newScheduledThreadPool(1)
         scheduler.scheduleAtFixedRate(fetchData(), 0, 1, TimeUnit.DAYS)
         if (cases == null) {
-            Log.d(TAG, "fetchData start")
+            Log.i(TAG, "fetchData start")
             a.start()
         }
 
@@ -42,7 +62,7 @@ class CaseAlert {
         } catch (e: Exception) {
             e.stackTrace
         }
-        Log.d(TAG, "initializeCasesAddress end: " + cases!!.size);
+        Log.i(TAG, "fetchData end: " + cases!!.size);
 
     }
 
