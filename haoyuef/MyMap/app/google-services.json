@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1055381205345",
+    "project_id": "mymap-df580",
+    "storage_bucket": "mymap-df580.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055381205345:android:c06f39768e10c6e2ffd520",
+        "android_client_info": {
+          "package_name": "com.example.mymap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1055381205345-1k7vgdq8ui2d5tb0md3h56mlifgrp2qe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoXWFrz8j3K-h5yDpj9VpxrEk0pDiVvO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1055381205345-1k7vgdq8ui2d5tb0md3h56mlifgrp2qe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
