@@ -1,4 +1,4 @@
-package com.example.mymap;
+package com.example.homepage;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;

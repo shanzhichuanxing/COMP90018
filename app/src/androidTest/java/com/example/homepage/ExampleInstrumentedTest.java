@@ -1,4 +1,4 @@
-package com.example.mymap;
+package com.example.homepage;
 
 import android.content.Context;
 
