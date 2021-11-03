@@ -2,12 +2,14 @@ package com.example.homepage
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CalendarView
 import android.widget.Toast
+import androidx.annotation.NonNull
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -17,6 +19,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.homepage.databinding.ActivityMapsBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 
 class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -24,6 +28,14 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     private lateinit var backButton: View
     private lateinit var calendar:CalendarView
+    private lateinit var mDatabase: DatabaseReference
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var userID: String
+
+    private lateinit var year: String
+    private lateinit var month: String
+    private lateinit var dayOfMonth: String
+    private lateinit var traceDays: DataSnapshot
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,14 +50,39 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         backButton.setOnClickListener {
             finish()
         }
+        mAuth = FirebaseAuth.getInstance()
+        userID = mAuth.currentUser!!.uid
+        Log.d("UserIDs:",userID)
+        mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
+
+        var ref = FirebaseDatabase.getInstance().getReference("Trace").child(userID)
+
+        val menuListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val traceList = dataSnapshot.child("Trace").getValue()
+                this.traceDays = dataSnapshot
+                Log.d("TD----------------:","traceList: " + traceList)
+
+            }
+            override fun onCancelled(databaseError: DatabaseError) {
+                // handle error
+            }
+        }
+        ref.addListenerForSingleValueEvent(menuListener)
+
+
+        Log.d("ONEDAY----------------:","2021-11-01: " + traceDays.child("2021-11-01"))
+
         calendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
+            this.year = year.toString()
+            this.month = month.toString()
+            this.dayOfMonth = dayOfMonth.toString()
+            // find the location markers sorted by time of a specific day
+            // draw the markers connected by a line
         }
-
-
-
 
     }
 

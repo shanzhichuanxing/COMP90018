@@ -35,17 +35,16 @@
 
         <activity
             android:name=".MapsActivity"
-            android:exported="true"
-            android:label="@string/title_activity_maps">
+            android:exported="true">
         </activity>
         <activity
             android:name=".TraceActivity"
             android:exported="true">
         </activity>
 
-        <activity
-            android:name="com.example.homepage.MainActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name="com.example.homepage.MainActivity"-->
+<!--            android:exported="true" />-->
         <activity
             android:name="com.example.homepage.LoginActivity"
             android:exported="true" />
