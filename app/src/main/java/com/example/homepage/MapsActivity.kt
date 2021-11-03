@@ -1,10 +1,13 @@
 package com.example.homepage
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.location.*
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
@@ -28,6 +31,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import java.io.IOException
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -96,15 +105,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             addMarkers()
             mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
         }
-        locSearch = findViewById<EditText?>(R.id.et_search)
-        searchIcon = findViewById<ImageButton?>(R.id.search_icon)
+ 
 
-        mAuth = FirebaseAuth.getInstance()
-        userID = mAuth.getCurrentUser().getUid()
-        mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
-
-        checkMyPermission()
-        isGPSEnabled()
 
         if (isPermissionGranted)
         {
@@ -205,6 +207,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
         mMap.addMarker(MarkerOptions().position(melbourne).title("Marker in Melbourne"))
@@ -260,99 +263,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         Log.i(TAG, "addMarkers completed")
-    }
-    private boolean isGPSEnabled()
-    {
-        locationManager = LocationManager getSystemService LOCATION_SERVICE
-        boolean providerEnabled = locationManager . isProviderEnabled LocationManager.GPS_PROVIDER
-        if (providerEnabled) {
-            Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show()
-            return true
-        } else {
-            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show()
-        }
-        return false
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        mMap.isMyLocationEnabled = true
-    }
-
-    private fun gotoLocation(latitude: Double, longitude: Double) {
-        val latLng = LatLng(latitude, longitude)
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
-        mMap.moveCamera(cameraUpdate)
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-    }
-
-
-    @SuppressLint("MissingPermission")
-    private fun getLocationUpdates() {
-        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
-        locationManager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            30000,
-            1f,
-            this@MapsActivity
-        )
-    }
-
-
-    fun onLocationChanged(location: Location) {
-        try {
-            val array = getGPSLocalTime(location.time)
-            val date = array[0]
-            val time = array[1]
-            val lat = location.latitude
-            val lng = location.longitude
-            Toast.makeText(
-                this,
-                "Location: " + location.latitude + ", " + location.longitude + ", " + time,
-                Toast.LENGTH_SHORT
-            ).show()
-            userID?.let { mDatabase?.child(it)?.child(date)?.child(time)?.child("Lat")?.setValue(lat) }
-            userID?.let { mDatabase?.child(it)?.child(date)?.child(time)?.child("Lng")?.setValue(lng) }
-        } catch (e: ParseException) {
-            e.printStackTrace()
-        }
-    }
-
-    @Throws(ParseException::class)
-    private fun getGPSLocalTime(gpsTime: Long): Array<String> {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = gpsTime
-        @SuppressLint("SimpleDateFormat") val datef =
-            SimpleDateFormat("yyyy-MM-dd")
-        @SuppressLint("SimpleDateFormat") val timef =
-            SimpleDateFormat("HH:mm:ss")
-        val calendarTime = calendar.time
-        val date = datef.format(calendarTime).toString()
-        val time = timef.format(calendarTime)
-        return arrayOf(date, time)
-    }
-
-    //Geocoder
-    private fun geoLocate(view: View) {
-        val locationName: String = locSearch.getText().toString()
-        val geocoder = Geocoder(this, Locale.getDefault())
-        try {
-            val addresses = geocoder.getFromLocationName(locationName, 1)
-            if (addresses.size > 0) {
-                val address = addresses[0]
-                gotoLocation(address.latitude, address.longitude)
-                addMarker(address)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    //add marker
-    private fun addMarker(address: Address) {
-        mMap.addMarker(MarkerOptions().position(LatLng(address.latitude, address.longitude)))
-        Toast.makeText(this, address.locality, Toast.LENGTH_SHORT).show()
     }
 
 }
