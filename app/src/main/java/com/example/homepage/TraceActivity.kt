@@ -35,13 +35,15 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var year: String
     private lateinit var month: String
     private lateinit var dayOfMonth: String
+
     private lateinit var traceDays: DataSnapshot
+    private lateinit var traceList: DataSnapshot
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.trace_maps)
-        backButton= findViewById(R.id.traceMenuBack)
-        calendar= findViewById(R.id.calendarView)
+        backButton = findViewById(R.id.traceMenuBack)
+        calendar = findViewById(R.id.calendarView)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -52,7 +54,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth.currentUser!!.uid
-        Log.d("UserIDs:",userID)
+        Log.d("UserIDs:", userID)
         mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
 
         var ref = FirebaseDatabase.getInstance().getReference("Trace").child(userID)
@@ -60,10 +62,11 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         val menuListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val traceList = dataSnapshot.child("Trace").getValue()
-                this.traceDays = dataSnapshot
-                Log.d("TD----------------:","traceList: " + traceList)
+                traceDays = dataSnapshot //gets the location at different times of each day
+                Log.d("TD----------------:", "traceDays: " + traceDays.getValue())
 
             }
+
             override fun onCancelled(databaseError: DatabaseError) {
                 // handle error
             }
@@ -71,22 +74,28 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         ref.addListenerForSingleValueEvent(menuListener)
 
 
-        Log.d("ONEDAY----------------:","2021-11-01: " + traceDays.child("2021-11-01"))
+
 
         calendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
+
             this.year = year.toString()
             this.month = month.toString()
             this.dayOfMonth = dayOfMonth.toString()
-            // find the location markers sorted by time of a specific day
-            // draw the markers connected by a line
+            if (dayOfMonth < 10) {
+                this.dayOfMonth = "0$dayOfMonth"
+            }
+            //read database
+            Log.d(
+                "onDateChangeListener",
+                "got" + traceDays.child(year.toString() + "-" + (month + 1).toString() + "-" + this.dayOfMonth)
+            )
+
         }
 
     }
-
-
 
     /**
      * Manipulates the map once available.
@@ -106,5 +115,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
 
     }
+
 }
 
