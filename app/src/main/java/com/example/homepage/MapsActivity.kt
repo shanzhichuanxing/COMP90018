@@ -1,26 +1,38 @@
 package com.example.homepage
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.location.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import java.io.IOException
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
@@ -40,6 +52,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
     private lateinit var reCenterButton:View
+
+    var isPermissionGranted = false
+    var isProviderEnabled = false
+
+    var fab: FloatingActionButton? = null
+    private val mLocationClient: FusedLocationProviderClient? = null
+    var locSearch: EditText? = null
+    var searchIcon: ImageButton? = null
+    private val mLocationCallback: LocationCallback? = null
+    private val mLocationRequest: LocationRequest? = null
+    var locationManager: LocationManager? = null
+    private var mDatabase: DatabaseReference? = null
+    private var mAuth: FirebaseAuth? = null
+    private var userID: String? = null
+    //fab = findViewById(R.id.fab);
 
     var myMarkers = ArrayList<Marker>()
 
@@ -69,7 +96,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             addMarkers()
             mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
         }
+        locSearch = findViewById<EditText?>(R.id.et_search)
+        searchIcon = findViewById<ImageButton?>(R.id.search_icon)
 
+        mAuth = FirebaseAuth.getInstance()
+        userID = mAuth.getCurrentUser().getUid()
+        mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
+
+        checkMyPermission()
+        isGPSEnabled()
+
+        if (isPermissionGranted)
+        {
+            if (isProviderEnabled) {
+                val supportMapFragment =
+                    supportFragmentManager.findFragmentById(R.id.fragment) as SupportMapFragment?
+                supportMapFragment!!.getMapAsync(this)
+            }
+        }
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
@@ -217,5 +261,99 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         Log.i(TAG, "addMarkers completed")
     }
+    private boolean isGPSEnabled()
+    {
+        locationManager = LocationManager getSystemService LOCATION_SERVICE
+        boolean providerEnabled = locationManager . isProviderEnabled LocationManager.GPS_PROVIDER
+        if (providerEnabled) {
+            Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show()
+            return true
+        } else {
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show()
+        }
+        return false
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+        mMap.isMyLocationEnabled = true
+    }
+
+    private fun gotoLocation(latitude: Double, longitude: Double) {
+        val latLng = LatLng(latitude, longitude)
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+        mMap.moveCamera(cameraUpdate)
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private fun getLocationUpdates() {
+        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            30000,
+            1f,
+            this@MapsActivity
+        )
+    }
+
+
+    fun onLocationChanged(location: Location) {
+        try {
+            val array = getGPSLocalTime(location.time)
+            val date = array[0]
+            val time = array[1]
+            val lat = location.latitude
+            val lng = location.longitude
+            Toast.makeText(
+                this,
+                "Location: " + location.latitude + ", " + location.longitude + ", " + time,
+                Toast.LENGTH_SHORT
+            ).show()
+            userID?.let { mDatabase?.child(it)?.child(date)?.child(time)?.child("Lat")?.setValue(lat) }
+            userID?.let { mDatabase?.child(it)?.child(date)?.child(time)?.child("Lng")?.setValue(lng) }
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+    }
+
+    @Throws(ParseException::class)
+    private fun getGPSLocalTime(gpsTime: Long): Array<String> {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = gpsTime
+        @SuppressLint("SimpleDateFormat") val datef =
+            SimpleDateFormat("yyyy-MM-dd")
+        @SuppressLint("SimpleDateFormat") val timef =
+            SimpleDateFormat("HH:mm:ss")
+        val calendarTime = calendar.time
+        val date = datef.format(calendarTime).toString()
+        val time = timef.format(calendarTime)
+        return arrayOf(date, time)
+    }
+
+    //Geocoder
+    private fun geoLocate(view: View) {
+        val locationName: String = locSearch.getText().toString()
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses = geocoder.getFromLocationName(locationName, 1)
+            if (addresses.size > 0) {
+                val address = addresses[0]
+                gotoLocation(address.latitude, address.longitude)
+                addMarker(address)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    //add marker
+    private fun addMarker(address: Address) {
+        mMap.addMarker(MarkerOptions().position(LatLng(address.latitude, address.longitude)))
+        Toast.makeText(this, address.locality, Toast.LENGTH_SHORT).show()
+    }
+
 }
 

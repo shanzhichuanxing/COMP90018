@@ -35,11 +35,13 @@
 
         <activity
             android:name=".MapsActivity"
-            android:exported="true">
+            android:exported="true"
+            android:label="Zones">
         </activity>
         <activity
             android:name=".TraceActivity"
-            android:exported="true">
+            android:exported="true"
+            android:label="Past Trace">
         </activity>
 
 <!--        <activity-->
