@@ -45,10 +45,6 @@
             android:exported="true"
             android:label="Past Trace">
         </activity>
-
-<!--        <activity-->
-<!--            android:name="com.example.homepage.MainActivity"-->
-<!--            android:exported="true" />-->
         <activity
             android:name="com.example.homepage.LoginActivity"
             android:exported="true" />
