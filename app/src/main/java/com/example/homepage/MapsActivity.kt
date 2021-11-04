@@ -3,8 +3,11 @@ package com.example.homepage
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.*
+import android.location.LocationListener
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
@@ -14,8 +17,9 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -23,37 +27,37 @@ import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
-import java.io.IOException
+import kotlinx.android.synthetic.main.activity_maps.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
     private val  rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close) }
     private val  fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom) }
     private val  toBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_bottom) }
     private var clicked = false;
-    private var clickYes=false;
     private val TAG = "MapsActivity"
     private var places = ArrayList<Place>()
-
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
@@ -62,31 +66,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var levelOneBtn:View
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
-
-    // modify by iris
-    private lateinit var mainMenuBtn:View
-    private lateinit var infoBtn:View
-    // finding the textView
-    //val searchStr = findViewById(R.id.searchBox) as TextView
-
     private lateinit var reCenterButton:View
 
     var isPermissionGranted = false
-    var isProviderEnabled = false
 
-    var fab: FloatingActionButton? = null
-    private val mLocationClient: FusedLocationProviderClient? = null
-    var locSearch: EditText? = null
-    var searchIcon: ImageButton? = null
-    private val mLocationCallback: LocationCallback? = null
-    private val mLocationRequest: LocationRequest? = null
     var locationManager: LocationManager? = null
     private var mDatabase: DatabaseReference? = null
     private var mAuth: FirebaseAuth? = null
     private var userID: String? = null
-    //fab = findViewById(R.id.fab);
-
+    private var mCurrentLocation: Location? = null
     var myMarkers = ArrayList<Marker>()
+
 
     private val alertOneIcon: BitmapDescriptor by lazy {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
@@ -100,68 +90,54 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier3)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-        mapFragment.getMapAsync {
-            addMarkers()
-            mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
-        }
-
-
+        mAuth = FirebaseAuth.getInstance()
+        userID = mAuth!!.currentUser!!.uid
+        mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
+        checkMyPermission()
+        isGPSEnabled()
 
         if (isPermissionGranted)
         {
-            if (isProviderEnabled) {
-                val supportMapFragment =
-                    supportFragmentManager.findFragmentById(R.id.fragment) as SupportMapFragment?
-                supportMapFragment!!.getMapAsync(this)
+            val supportMapFragment =
+                supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+            supportMapFragment!!.getMapAsync(this)
+            supportMapFragment.getMapAsync {
+                addMarkers()
+                mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
             }
         }
+
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
-
-        // modify by iris
-
-//        searchStr?.setOnClickListener{ Toast.makeText(this@MapsActivity,
-//            "COMPUTER SCIENCE PORTAL", Toast.LENGTH_LONG).show() }
-//
-
-
-        mainMenuBtn=findViewById(R.id.mainMenu)
-        infoBtn=findViewById(R.id.info)
-
-
-
-        infoBtn.setOnClickListener(View.OnClickListener {
-            val intent = Intent(this@MapsActivity, InfoActivity::class.java)
-            startActivity(intent)
-        })
-
-        mainMenuBtn.setOnClickListener{
-            onAddButtonClickedMain()
-        }
-        //////////
-        layerButton.setOnClickListener{
-            onAddButtonClicked()
-        }
-
+        reCenterButton= findViewById(R.id.location)
 
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
             startActivity(intent)
         })
-
+        reCenterButton.setOnClickListener{
+            if (mCurrentLocation == null) {
+                Log.d("reCenterButton","Null current location")
+                return@setOnClickListener
+            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation?.let { it1 ->
+                LatLng(
+                    it1.latitude, mCurrentLocation!!.longitude)
+            },15f))
+        }
+        layerButton.setOnClickListener{
+            onAddButtonClicked()
+        }
 
         levelOneBtn.setOnClickListener{
             myMarkers.forEach { marker ->
@@ -186,6 +162,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 var place = marker.tag as Place
                 if (place.alert_level == 3) {
                     marker.isVisible = !marker.isVisible
+
                 }
             }
             Toast.makeText(this, "levelThree Clicked",Toast.LENGTH_SHORT).show()
@@ -197,39 +174,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setAnimation(clicked)
         clicked = !clicked
     }
-    //iris
-    private fun onAddButtonClickedMain() {
-        setVisibilityMain(clickYes)
-        setAnimationMain(clickYes)
-        clickYes = !clickYes
-    }
-
-    private fun setVisibilityMain(clickYes: Boolean){
-        if(!clickYes){
-            // iris
-            traceMenuButton.visibility=View.VISIBLE
-            infoBtn.visibility=View.VISIBLE
-        }else{
-            // iris
-            traceMenuButton.visibility=View.INVISIBLE
-            infoBtn.visibility=View.INVISIBLE
-        }
-    }
-
-    private fun setAnimationMain(clickYes: Boolean){
-        if(!clickYes){
-            //iris
-            infoBtn.startAnimation(fromBottom)
-            traceMenuButton.startAnimation(fromBottom)
-            mainMenuBtn.startAnimation(rotateOpen)
-        }else{
-            infoBtn.startAnimation(toBottom)
-            traceMenuButton.startAnimation(toBottom)
-            mainMenuBtn.startAnimation(rotateClose)
-
-        }
-    }
-    /////
 
     private fun setVisibility(clicked: Boolean) {
 
@@ -237,12 +181,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             levelOneBtn.visibility = View.VISIBLE
             levelTwoBtn.visibility = View.VISIBLE
             levelThreeBtn.visibility = View.VISIBLE
-
         }else{
             levelOneBtn.visibility = View.INVISIBLE
             levelTwoBtn.visibility = View.INVISIBLE
             levelThreeBtn.visibility = View.INVISIBLE
-
         }
 
     }
@@ -254,13 +196,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             levelTwoBtn.startAnimation(fromBottom)
             levelThreeBtn.startAnimation(fromBottom)
             layerButton.startAnimation(rotateOpen)
-
         }else{
             levelOneBtn.startAnimation(toBottom)
             levelTwoBtn.startAnimation(toBottom)
             levelThreeBtn.startAnimation(toBottom)
             layerButton.startAnimation(rotateClose)
-
         }
     }
 
@@ -276,21 +216,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = false
+        mMap.uiSettings.isMapToolbarEnabled = false
+        mMap.uiSettings.isIndoorLevelPickerEnabled = false
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
-        mMap.addMarker(MarkerOptions().position(melbourne).title("Marker in Melbourne"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
 
+        var myLocation = mCurrentLocation?.let { LatLng(it.latitude, mCurrentLocation!!.longitude) }
+        if (myLocation==null){
+            myLocation = melbourne
+        }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15f))
     }
 
     /**
      * Adds marker representations of the places list on the provided GoogleMap object
      */
     private fun addMarkers() {
-
         places = CaseAlert().getPlaces(this)!!;
-
         places.forEach{ place ->
             when (place.alert_level) {
                 1 -> {
@@ -322,6 +277,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .position(place.latLng)
                             .icon(alertThreeIcon)
                             .visible(false)
+
                     )
                     // Set place as the tag on the marker object so it can be referenced within
                     // MarkerInfoWindowAdapter
@@ -334,5 +290,95 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         Log.i(TAG, "addMarkers completed")
     }
 
+
+    @Throws(ParseException::class)
+    private fun getGPSLocalTime(gpsTime: Long): Array<String> {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = gpsTime
+        @SuppressLint("SimpleDateFormat") val datef =
+            SimpleDateFormat("yyyy-MM-dd")
+        @SuppressLint("SimpleDateFormat") val timef =
+            SimpleDateFormat("HH:mm:ss")
+        val calendarTime = calendar.time
+        val date = datef.format(calendarTime).toString()
+        val time = timef.format(calendarTime)
+        return arrayOf(date, time)
+    }
+
+    private fun checkMyPermission() {
+        Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
+                    Toast.makeText(this@MapsActivity, "Permission Granted", Toast.LENGTH_SHORT)
+                        .show()
+                    isPermissionGranted = true
+                    getLocationUpdates()
+                }
+
+                override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", packageName, "")
+                    intent.data = uri
+                    startActivity(intent)
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissionRequest: PermissionRequest,
+                    permissionToken: PermissionToken
+                ) {
+                    permissionToken.continuePermissionRequest()
+                }
+            }).check()
+    }
+    private fun isGPSEnabled(): Boolean {
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
+        var providerEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if(providerEnabled == true){
+            Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+    private fun gotoLocation(latitude: Double, longitude: Double) {
+        val latLng = LatLng(latitude, longitude)
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+        mMap.moveCamera(cameraUpdate)
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+    }
+    @SuppressLint("MissingPermission")
+    private fun getLocationUpdates() {
+        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager!!.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            30000,
+            1f,
+            this
+        )
+    }
+
+    override fun onLocationChanged(location: Location) {
+        try {
+
+            val array = getGPSLocalTime(location.time)
+            val date = "2021-11-01"
+            val time = array[1]
+            val lat = location.latitude
+            val lng = location.longitude
+            mCurrentLocation = location
+            Toast.makeText(
+                this,
+                "Location: " + location.latitude + ", " + location.longitude + ", " + time,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
+            mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+    }
 }
 
