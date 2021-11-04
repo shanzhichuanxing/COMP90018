@@ -37,7 +37,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dayOfMonth: String
 
     private lateinit var traceDays: DataSnapshot
-    private var places = ArrayList<Place>()
+    private lateinit var places: Array<Place>
 
 
     private val alertOneIcon: BitmapDescriptor by lazy {
@@ -65,6 +65,9 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         backButton.setOnClickListener {
             finish()
         }
+        places = intent.getSerializableExtra("places") as Array<Place>
+        var attachments = places.toCollection(ArrayList())
+        Log.d("extras",attachments.toString())
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth.currentUser!!.uid
         Log.d("UserIDs:", userID)
@@ -163,7 +166,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         val melbourne = LatLng(-37.8116, 144.9646)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-        places = CaseAlert().getPlaces(this)!!;
+        Log.d("MyMarker", MapsActivity().myMarkers.toString())
         addMarkers()
     }
     /**
@@ -171,45 +174,38 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     private fun addMarkers() {
 
-        places.forEach{ place ->
-            when (place.alert_level) {
-                1 -> {
-                    val marker = mMap.addMarker(
-                        MarkerOptions()
-                            .title(place.name)
-                            .position(place.latLng)
-                            .icon(alertOneIcon)
-                            .visible(true)
-                    )
+        MapsActivity().myMarkers.forEach { marker ->
+           var place = marker.tag as Place
+           when (place.alert_level) {
+               1 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(place.latLng)
+                           .icon(alertOneIcon)
+                           .visible(true)
+                   )
+               }
+               2 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(place.latLng)
+                           .icon(alertTwoIcon)
+                           .visible(true)
+                   )
+               }
+               3 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(place.latLng)
+                           .icon(alertThreeIcon)
+                           .visible(true)
+                   )
+               }
+           }
 
-                }
-                2 -> {
-                    val marker = mMap.addMarker(
-                        MarkerOptions()
-                            .title(place.name)
-                            .position(place.latLng)
-                            .icon(alertTwoIcon)
-                            .visible(true)
-                    )
-
-
-                }
-                3 -> {
-                    val marker = mMap.addMarker(
-                        MarkerOptions()
-                            .title(place.name)
-                            .position(place.latLng)
-                            .icon(alertThreeIcon)
-                            .visible(true)
-
-                    )
-                    // Set place as the tag on the marker object so it can be referenced within
-                    // MarkerInfoWindowAdapter
-
-
-                }
-
-            }
         }
         Log.i("AddMarker", "addMarkers completed")
     }

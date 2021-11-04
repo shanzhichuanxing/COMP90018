@@ -123,6 +123,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
+            intent.putExtra("places",places)
             startActivity(intent)
         })
         reCenterButton.setOnClickListener{
