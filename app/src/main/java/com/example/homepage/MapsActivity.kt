@@ -14,6 +14,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 
 import com.google.android.gms.maps.model.LatLng
@@ -49,6 +50,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val  fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom) }
     private val  toBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_bottom) }
     private var clicked = false;
+    private var clickYes=false;
     private val TAG = "MapsActivity"
     private var places = ArrayList<Place>()
 
@@ -64,8 +66,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     // modify by iris
     private lateinit var mainMenuBtn:View
     private lateinit var infoBtn:View
-
-
+    // finding the textView
+    //val searchStr = findViewById(R.id.searchBox) as TextView
 
     private lateinit var reCenterButton:View
 
@@ -129,6 +131,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         layerButton= findViewById(R.id.layerButton)
 
         // modify by iris
+
+//        searchStr?.setOnClickListener{ Toast.makeText(this@MapsActivity,
+//            "COMPUTER SCIENCE PORTAL", Toast.LENGTH_LONG).show() }
+//
+
+
         mainMenuBtn=findViewById(R.id.mainMenu)
         infoBtn=findViewById(R.id.info)
 
@@ -140,15 +148,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         })
 
         mainMenuBtn.setOnClickListener{
-            onAddButtonClicked_main()
+            onAddButtonClickedMain()
         }
-
-
-
-
-
         //////////
-
+        layerButton.setOnClickListener{
+            onAddButtonClicked()
+        }
 
 
         traceMenuButton = findViewById(R.id.traceMenu)
@@ -157,9 +162,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             startActivity(intent)
         })
 
-        layerButton.setOnClickListener{
-            onAddButtonClicked()
-        }
 
         levelOneBtn.setOnClickListener{
             myMarkers.forEach { marker ->
@@ -196,14 +198,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         clicked = !clicked
     }
     //iris
-    private fun onAddButtonClicked_main() {
-        setVisibility_main(clicked)
-        setAnimation_main(clicked)
-        clicked = !clicked
+    private fun onAddButtonClickedMain() {
+        setVisibilityMain(clickYes)
+        setAnimationMain(clickYes)
+        clickYes = !clickYes
     }
 
-    private fun setVisibility_main(clicked: Boolean){
-        if(!clicked){
+    private fun setVisibilityMain(clickYes: Boolean){
+        if(!clickYes){
             // iris
             traceMenuButton.visibility=View.VISIBLE
             infoBtn.visibility=View.VISIBLE
@@ -214,8 +216,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun setAnimation_main(clicked: Boolean){
-        if(!clicked){
+    private fun setAnimationMain(clickYes: Boolean){
+        if(!clickYes){
             //iris
             infoBtn.startAnimation(fromBottom)
             traceMenuButton.startAnimation(fromBottom)
