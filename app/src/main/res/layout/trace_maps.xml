@@ -8,7 +8,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/traceMenuBack"
-        android:layout_width="36dp"
+        android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
@@ -16,6 +16,7 @@
         android:layout_marginBottom="525dp"
         android:clickable="true"
         app:srcCompat="@drawable/back"
+        app:fabCustomSize="40dp"
         app:tint="@null" />
 
     <LinearLayout
