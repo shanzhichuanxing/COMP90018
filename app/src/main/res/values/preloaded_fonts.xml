@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="preloaded_fonts" translatable="false">
-        <item>@font/average_sans</item>
         <item>@font/averia_libre_bold</item>
-        <item>@font/averia_sans_libre_bold_italic</item>
+        <item>@font/averia_serif_libre</item>
+        <item>@font/averia_serif_libre_italic</item>
     </array>
 </resources>

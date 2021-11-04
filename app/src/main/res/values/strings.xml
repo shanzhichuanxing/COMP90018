@@ -1,9 +1,16 @@
 <resources>
-    <string name="app_name">CovidSafe</string>
-    <string name="title_activity_maps">MapsActivity</string>
-    <string name="title_activity_maps2">MapsActivity2</string>
-    <string name="open">Open</string>
-    <string name="close">Close</string>
+
+    <string name="app_name">Homepage</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+
     <string name="title_text">Covid-Safe</string>
     <string name="intro_text">TRACK YOUR TRACE and be COVIDSAFE</string>
     <string name="get_started">GET STARTED</string>
@@ -11,11 +18,12 @@
     <string name="password_hint">Password</string>
     <string name="login_text">LOGIN</string>
     <string name="or_text">Or</string>
-    <string name="create_account_text">Create Account</string>
+    <string name="create_account_text">CREATE ACCOUNT</string>
     <string name="info_title">COVID INFORMATION</string>
     <string name="info_text">"Symptoms of COVID-19 can range from mild illness to pneumonia. Some people will recover easily, and others may get very sick very quickly. People with coronavirus may experience symptoms such as:  fever respiratory symptoms coughing sore throat shortness of breath. Other symptoms can include runny nose, acute blocked nose (congestion), headache, muscle or joint pains, nausea, diarrhoea, vomiting, loss of sense of smell, altered sense of taste, loss of appetite and fatigue.  "</string>
     <string name="symptoms">Symptoms</string>
     <string name="Protect">Protect yourself and others</string>
     <string name="protect_text">Wash your hands often with soap and water.
         This includes before and after eating and after going to the toilet use alcohol-based hand sanitisers when you can’t use soap and water avoid touching your eyes, nose and mouth clean and disinfect surfaces you use often such as benchtops, desks and doorknobs clean and disinfect objects you use often such as mobile phones, keys, wallets and work passes increase the amount of fresh air by opening windows or changing air conditioning</string>
+
 </resources>
