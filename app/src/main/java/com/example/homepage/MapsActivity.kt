@@ -194,13 +194,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
+        reCenterButton= findViewById(R.id.location)
+
 
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
             startActivity(intent)
         })
-
+        reCenterButton.setOnClickListener{
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation?.let { it1 ->
+                LatLng(
+                    it1.latitude, mCurrentLocation!!.longitude)
+            },15f))
+        }
         layerButton.setOnClickListener{
             onAddButtonClicked()
         }
@@ -281,12 +288,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            mMap.isMyLocationEnabled = true
+            mMap.uiSettings.isMyLocationButtonEnabled = true
+            mMap.uiSettings.isMapToolbarEnabled = false
+            mMap.uiSettings.isIndoorLevelPickerEnabled = false
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = false
+        mMap.uiSettings.isMapToolbarEnabled = false
+        mMap.uiSettings.isIndoorLevelPickerEnabled = false
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
-        mMap.addMarker(MarkerOptions().position(melbourne).title("Marker in Melbourne"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-        mMap.isMyLocationEnabled = true
+
+        var myLocation = mCurrentLocation?.let { LatLng(it.latitude, mCurrentLocation!!.longitude) }
+        if (myLocation==null){
+            myLocation = melbourne
+        }
+        mMap.addMarker(myLocation?.let { MarkerOptions().position(it).title("Current Location") })
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15f))
     }
 
     /**
@@ -483,16 +518,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
 
     override fun onLocationChanged(location: Location) {
         try {
+            mMap.clear()
             val array = getGPSLocalTime(location.time)
-            val date = array[0]
+            val date = "2021-11-01"
             val time = array[1]
             val lat = location.latitude
             val lng = location.longitude
+            mCurrentLocation = location
             Toast.makeText(
                 this,
                 "Location: " + location.latitude + ", " + location.longitude + ", " + time,
                 Toast.LENGTH_SHORT
             ).show()
+
             mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
             mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
         } catch (e: ParseException) {
