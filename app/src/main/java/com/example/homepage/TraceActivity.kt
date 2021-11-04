@@ -34,6 +34,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.example.homepage.databinding.ActivityMapsBinding
+import com.example.homepage.model.Place
+import com.example.homepage.utils.BitmapHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -56,7 +58,20 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dayOfMonth: String
 
     private lateinit var traceDays: DataSnapshot
-    private lateinit var traceList: DataSnapshot
+    private var places = ArrayList<Place>()
+
+
+    private val alertOneIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
+    }
+
+    private val alertTwoIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier2)
+    }
+
+    private val alertThreeIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier3)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,12 +109,12 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-
         calendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
             mMap.clear()
+            addMarkers()
             this.year = year.toString()
             this.month = month.toString()
             this.dayOfMonth = dayOfMonth.toString()
@@ -180,116 +195,58 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         val melbourne = LatLng(-37.8116, 144.9646)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-
+        places = CaseAlert().getPlaces(this)!!;
+        addMarkers()
     }
-    //https://developers.google.com/maps/documentation/android-sdk/polygon-tutorial
-    private val COLOR_BLACK_ARGB = -0x1000000
-    private val POLYLINE_STROKE_WIDTH_PX = 12
-
     /**
-     * Styles the polyline, based on type.
-     * @param polyline The polyline object that needs styling.
+     * Adds marker representations of the places list on the provided GoogleMap object
      */
-    private fun stylePolyline(polyline: Polyline) {
-        // Get the data object stored with the polyline.
-        val type = polyline.tag?.toString() ?: ""
-        when (type) {
-            "A" -> {
-                // Use a custom bitmap as the cap at the start of the line.
-                polyline.startCap = CustomCap(
-                    BitmapDescriptorFactory.fromResource(R.drawable.ic_arrow_foreground), 10f)
-            }
-            "B" -> {
-                // Use a round cap at the start of the line.
-                polyline.startCap = RoundCap()
-            }
-        }
-        polyline.endCap = RoundCap()
-        polyline.width = POLYLINE_STROKE_WIDTH_PX.toFloat()
-        polyline.color = COLOR_BLACK_ARGB
-        polyline.jointType = JointType.ROUND
-    }
+    private fun addMarkers() {
 
-    private val PATTERN_GAP_LENGTH_PX = 20
-    private val DOT: PatternItem = Dot()
-    private val GAP: PatternItem = Gap(PATTERN_GAP_LENGTH_PX.toFloat())
+        places.forEach{ place ->
+            when (place.alert_level) {
+                1 -> {
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(place.latLng)
+                            .icon(alertOneIcon)
+                            .visible(true)
+                    )
 
-    // Create a stroke pattern of a gap followed by a dot.
-    private val PATTERN_POLYLINE_DOTTED = listOf(GAP, DOT)
+                }
+                2 -> {
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(place.latLng)
+                            .icon(alertTwoIcon)
+                            .visible(true)
+                    )
 
-    /**
-     * Listens for clicks on a polyline.
-     * @param polyline The polyline object that the user has clicked.
-     */
-    fun onPolylineClick(polyline: Polyline) {
-        // Flip from solid stroke to dotted stroke pattern.
-        if (polyline.pattern == null || !polyline.pattern!!.contains(DOT)) {
-            polyline.pattern = PATTERN_POLYLINE_DOTTED
-        } else {
-            // The default pattern is a solid stroke.
-            polyline.pattern = null
-        }
-        Toast.makeText(this, "Route type " + polyline.tag.toString(),
-            Toast.LENGTH_SHORT).show()
-    }
 
-    /**
-     * Listens for clicks on a polygon.
-     * @param polygon The polygon object that the user has clicked.
-     */
-    fun onPolygonClick(polygon: Polygon) {
-        // Flip the values of the red, green, and blue components of the polygon's color.
-        var color = polygon.strokeColor xor 0x00ffffff
-        polygon.strokeColor = color
-        color = polygon.fillColor xor 0x00ffffff
-        polygon.fillColor = color
-        Toast.makeText(this, "Area type ${polygon.tag?.toString()}", Toast.LENGTH_SHORT).show()
-    }
+                }
+                3 -> {
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(place.latLng)
+                            .icon(alertThreeIcon)
+                            .visible(true)
 
-    private val COLOR_WHITE_ARGB = -0x1
-    private val COLOR_DARK_GREEN_ARGB = -0xc771c4
-    private val COLOR_LIGHT_GREEN_ARGB = -0x7e387c
-    private val COLOR_DARK_ORANGE_ARGB = -0xa80e9
-    private val COLOR_LIGHT_ORANGE_ARGB = -0x657db
-    private val POLYGON_STROKE_WIDTH_PX = 8
-    private val PATTERN_DASH_LENGTH_PX = 20
+                    )
+                    // Set place as the tag on the marker object so it can be referenced within
+                    // MarkerInfoWindowAdapter
 
-    private val DASH: PatternItem = Dash(PATTERN_DASH_LENGTH_PX.toFloat())
 
-    // Create a stroke pattern of a gap followed by a dash.
-    private val PATTERN_POLYGON_ALPHA = listOf(GAP, DASH)
+                }
 
-    // Create a stroke pattern of a dot followed by a gap, a dash, and another gap.
-    private val PATTERN_POLYGON_BETA = listOf(DOT, GAP, DASH, GAP)
-
-    /**
-     * Styles the polygon, based on type.
-     * @param polygon The polygon object that needs styling.
-     */
-    private fun stylePolygon(polygon: Polygon) {
-        // Get the data object stored with the polygon.
-        val type = polygon.tag?.toString() ?: ""
-        var pattern: List<PatternItem>? = null
-        var strokeColor = COLOR_BLACK_ARGB
-        var fillColor = COLOR_WHITE_ARGB
-        when (type) {
-            "alpha" -> {
-                // Apply a stroke pattern to render a dashed line, and define colors.
-                pattern = PATTERN_POLYGON_ALPHA
-                strokeColor = COLOR_DARK_GREEN_ARGB
-                fillColor = COLOR_LIGHT_GREEN_ARGB
-            }
-            "beta" -> {
-                // Apply a stroke pattern to render a line of dots and dashes, and define colors.
-                pattern = PATTERN_POLYGON_BETA
-                strokeColor = COLOR_DARK_ORANGE_ARGB
-                fillColor = COLOR_LIGHT_ORANGE_ARGB
             }
         }
-        polygon.strokePattern = pattern
-        polygon.strokeWidth = POLYGON_STROKE_WIDTH_PX.toFloat()
-        polygon.strokeColor = strokeColor
-        polygon.fillColor = fillColor
+        Log.i("AddMarker", "addMarkers completed")
     }
+
+
+
 }
 

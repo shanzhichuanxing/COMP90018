@@ -36,8 +36,7 @@ class CaseAlert {
     }
 
     private fun getCases(): ArrayList<Case>? {
-        initializeCasesAddress()
-
+        if(cases == null)initializeCasesAddress()
         return cases
     }
 
