@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         //fab = findViewById(R.id.fab);
-        locSearch = findViewById(R.id.et_search);
-        searchIcon = findViewById(R.id.search_icon);
+//        locSearch = findViewById(R.id.et_search);
+//        searchIcon = findViewById(R.id.search_icon);
 
         mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();

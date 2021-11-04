@@ -107,7 +107,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                 this.dayOfMonth = "0$dayOfMonth"
             }
             //read database
-            if(traceDays==null){
+            if(!(this::traceDays.isInitialized)){
                 Toast.makeText(this@TraceActivity, "We haven't gotten the data yet!PLease wait and try again master!BZZ", Toast.LENGTH_SHORT).show()
                 return@setOnDateChangeListener;
             }
@@ -157,7 +157,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             val bounds = b.build()
-            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 10, 10, 1)
+            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 100, 100, 20)
             mMap.animateCamera(cu)
 
         }

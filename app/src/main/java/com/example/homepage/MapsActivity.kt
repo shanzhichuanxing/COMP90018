@@ -24,6 +24,7 @@ import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
@@ -37,7 +38,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
-import java.io.IOException
+import kotlinx.android.synthetic.main.activity_maps.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -61,6 +62,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
     private lateinit var reCenterButton:View
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     var isPermissionGranted = false
     var isProviderEnabled = false
@@ -105,7 +107,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             addMarkers()
             mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
         }
- 
+
+        //fab = findViewById(R.id.fab);
+//        locSearch = findViewById(R.id.et_search);
+//        searchIcon = findViewById(R.id.search_icon);
+        //adding haoyue
+        mAuth = FirebaseAuth.getInstance()
+        userID = mAuth!!.currentUser!!.uid
+        mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
+        checkMyPermission()
 
 
         if (isPermissionGranted)
@@ -116,6 +126,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 supportMapFragment!!.getMapAsync(this)
             }
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                Log.d("LastLocation","location"+location.toString())
+            }
+        //get location
+
+
+
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
@@ -264,6 +284,57 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         Log.i(TAG, "addMarkers completed")
     }
+    private fun checkMyPermission() {
+        Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
+                    Toast.makeText(this@MapsActivity, "Permission Granted", Toast.LENGTH_SHORT)
+                        .show()
+                    isPermissionGranted = true
+
+                }
+
+                override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", packageName, "")
+                    intent.data = uri
+                    startActivity(intent)
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissionRequest: PermissionRequest,
+                    permissionToken: PermissionToken
+                ) {
+                    permissionToken.continuePermissionRequest()
+                }
+            }).check()
+    }
+
+    @Throws(ParseException::class)
+    private fun getGPSLocalTime(gpsTime: Long): Array<String> {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = gpsTime
+        @SuppressLint("SimpleDateFormat") val datef =
+            SimpleDateFormat("yyyy-MM-dd")
+        @SuppressLint("SimpleDateFormat") val timef =
+            SimpleDateFormat("HH:mm:ss")
+        val calendarTime = calendar.time
+        val date = datef.format(calendarTime).toString()
+        val time = timef.format(calendarTime)
+        return arrayOf(date, time)
+    }
+
+    private fun writeLocToDB(location:Location){
+        val array: Array<String> = getGPSLocalTime(location.getTime())
+        val date = array[0]
+        val time = array[1]
+        val lat: Double = location.getLatitude()
+        val lng: Double = location.getLongitude()
+        mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
+        mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
+    }
+
 
 }
 
