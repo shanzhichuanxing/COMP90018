@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.*
+import android.location.LocationListener
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -55,7 +56,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
     private val  rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close) }
     private val  fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom) }
@@ -129,10 +130,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth!!.currentUser!!.uid
         mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
-        setUpGPS()
-
-
-
+        checkMyPermission()
+        isGPSEnabled()
 
 
         if (isPermissionGranted)
@@ -143,52 +142,52 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 supportMapFragment!!.getMapAsync(this)
             }
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-                // Success
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location : Location? ->
-                    // Got last known location. In some rare situations this can be null.
-                    Log.d("LastLocation",location.toString())
-                    mCurrentLocation= location;// initialises
-                }
-            return
-        }
-        else{
-            //no permission yet
-
-            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.M){
-                requestPermissions(Manifest.permission.ACCESS_FINE_LOCATION.toCharArray().map { it.toString() }.toTypedArray(),PERMISSIONS_FINE_LOCATION)
-            }
-        }
+//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_COARSE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//                // Success
+//            fusedLocationClient.lastLocation
+//                .addOnSuccessListener { location : Location? ->
+//                    // Got last known location. In some rare situations this can be null.
+//                    Log.d("LastLocation",location.toString())
+//                    mCurrentLocation= location;// initialises
+//                }
+//            return
+//        }
+//        else{
+//            //no permission yet
+//
+//            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.M){
+//                requestPermissions(Manifest.permission.ACCESS_FINE_LOCATION.toCharArray().map { it.toString() }.toTypedArray(),PERMISSIONS_FINE_LOCATION)
+//            }
+//        }
 
 
         //get location
-        mLocationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                Log.d("UpdateLocation","called")
-                locationResult ?: return
-                for (location in locationResult.locations){
-                    Log.d("UpdateLocation",location.toString())
-                    // Update UI with location data
-                    // ...
-                }
-            }
-        }
+//        mLocationCallback = object : LocationCallback() {
+//            override fun onLocationResult(locationResult: LocationResult?) {
+//                Log.d("UpdateLocation","called")
+//                locationResult ?: return
+//                for (location in locationResult.locations){
+//                    Log.d("UpdateLocation",location.toString())
+//                    // Update UI with location data
+//                    // ...
+//                }
+//            }
+//        }
 
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
@@ -287,7 +286,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val melbourne = LatLng(-37.8116, 144.9646)
         mMap.addMarker(MarkerOptions().position(melbourne).title("Marker in Melbourne"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-
+        mMap.isMyLocationEnabled = true
     }
 
     /**
@@ -339,32 +338,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         Log.i(TAG, "addMarkers completed")
     }
-    private fun checkMyPermission() {
-        Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            .withListener(object : PermissionListener {
-                override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-                    Toast.makeText(this@MapsActivity, "Permission Granted", Toast.LENGTH_SHORT)
-                        .show()
-                    isPermissionGranted = true
 
-                }
-
-                override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {
-                    val intent = Intent()
-                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    val uri = Uri.fromParts("package", packageName, "")
-                    intent.data = uri
-                    startActivity(intent)
-                }
-
-                override fun onPermissionRationaleShouldBeShown(
-                    permissionRequest: PermissionRequest,
-                    permissionToken: PermissionToken
-                ) {
-                    permissionToken.continuePermissionRequest()
-                }
-            }).check()
-    }
 
     @Throws(ParseException::class)
     private fun getGPSLocalTime(gpsTime: Long): Array<String> {
@@ -386,42 +360,42 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
     }
-    private fun writeLocToDB(location:Location){
-        val array: Array<String> = getGPSLocalTime(location.getTime())
-        val date = array[0]
-        val time = array[1]
-        val lat: Double = location.getLatitude()
-        val lng: Double = location.getLongitude()
-        mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
-        mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
-    }
-    override fun onResume() {
-        super.onResume()
-        if (isPermissionGranted) startLocationUpdates()
-    }
+//    private fun writeLocToDB(location:Location){
+//        val array: Array<String> = getGPSLocalTime(location.getTime())
+//        val date = array[0]
+//        val time = array[1]
+//        val lat: Double = location.getLatitude()
+//        val lng: Double = location.getLongitude()
+//        mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
+//        mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
+//    }
+//    override fun onResume() {
+//        super.onResume()
+//        if (isPermissionGranted) startLocationUpdates()
+//    }
 
-    private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        fusedLocationClient.requestLocationUpdates(mLocationRequest,
-            mLocationCallback,
-            Looper.getMainLooper())
-    }
+//    private fun startLocationUpdates() {
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_COARSE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return
+//        }
+//        fusedLocationClient.requestLocationUpdates(mLocationRequest,
+//            mLocationCallback,
+//            Looper.getMainLooper())
+//    }
     private fun setUpGPS(){
         createLocationRequest()
         val builder = mLocationRequest?.let {
@@ -452,6 +426,78 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
     }
+    private fun checkMyPermission() {
+        Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
+                    Toast.makeText(this@MapsActivity, "Permission Granted", Toast.LENGTH_SHORT)
+                        .show()
+                    isPermissionGranted = true
+                    getLocationUpdates()
+                }
 
+                override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", packageName, "")
+                    intent.data = uri
+                    startActivity(intent)
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissionRequest: PermissionRequest,
+                    permissionToken: PermissionToken
+                ) {
+                    permissionToken.continuePermissionRequest()
+                }
+            }).check()
+    }
+    private fun isGPSEnabled(): Boolean {
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
+        var providerEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if(providerEnabled == true){
+            Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+    private fun gotoLocation(latitude: Double, longitude: Double) {
+        val latLng = LatLng(latitude, longitude)
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+        mMap.moveCamera(cameraUpdate)
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+    }
+    @SuppressLint("MissingPermission")
+    private fun getLocationUpdates() {
+        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager!!.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            30000,
+            1f,
+            this
+        )
+    }
+
+
+    override fun onLocationChanged(location: Location) {
+        try {
+            val array = getGPSLocalTime(location.time)
+            val date = array[0]
+            val time = array[1]
+            val lat = location.latitude
+            val lng = location.longitude
+            Toast.makeText(
+                this,
+                "Location: " + location.latitude + ", " + location.longitude + ", " + time,
+                Toast.LENGTH_SHORT
+            ).show()
+            mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
+            mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+    }
 }
 
