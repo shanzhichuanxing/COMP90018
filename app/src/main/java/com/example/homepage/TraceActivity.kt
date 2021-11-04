@@ -157,7 +157,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             val bounds = b.build()
-            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 25, 25, 5)
+            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 10, 10, 1)
             mMap.animateCamera(cu)
 
         }

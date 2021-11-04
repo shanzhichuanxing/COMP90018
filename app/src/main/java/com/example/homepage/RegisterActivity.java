@@ -94,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
                             pd.dismiss();
                             Toast.makeText(RegisterActivity.this, "Update the profile " +
                                     "for better expereince", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(RegisterActivity.this , MainActivity.class);
+                            Intent intent = new Intent(RegisterActivity.this , MapsActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                             finish();
