@@ -64,7 +64,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     // serach bar
-    private lateinit var searchBar:SearchView
+    //private lateinit var searchBar:SearchView
     private lateinit var searchText:TextView
     private lateinit var searchIcon:ImageView
     private lateinit var cardView:CardView
@@ -114,7 +114,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         isGPSEnabled()
 
 
-        searchBar=findViewById(R.id.searchBar)
+        //searchBar=findViewById(R.id.searchBar)
         searchText=findViewById(R.id.searchBox)
         searchIcon=findViewById(R.id.search)
         cardView=findViewById(R.id.cardView)
