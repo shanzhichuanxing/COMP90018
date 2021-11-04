@@ -37,16 +37,18 @@ class CaseAlert {
 
     private fun getCases(): ArrayList<Case>? {
         initializeCasesAddress()
-        try {
-            fetchData().join()
-        } catch (e: Exception) {
-            e.stackTrace
-        }
+
         return cases
     }
 
     private fun initializeCasesAddress() {
-        fetchData().start();
+        var fetch = fetchData()
+        fetch.start();
+        try {
+            fetch.join()
+        } catch (e: Exception) {
+            e.stackTrace
+        }
     }
 
     internal inner class fetchData : Thread() {

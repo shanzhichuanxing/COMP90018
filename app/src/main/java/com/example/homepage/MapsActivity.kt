@@ -193,6 +193,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 var place = marker.tag as Place
                 if (place.alert_level == 3) {
                     marker.isVisible = !marker.isVisible
+
                 }
             }
             Toast.makeText(this, "levelThree Clicked",Toast.LENGTH_SHORT).show()
@@ -283,9 +284,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
      * Adds marker representations of the places list on the provided GoogleMap object
      */
     private fun addMarkers() {
-
+        Log.d("addMarkers!!!!","1")
         places = CaseAlert().getPlaces(this)!!;
-
+        Log.d("addMarkers!!!!","1.1" + places)
         places.forEach{ place ->
             when (place.alert_level) {
                 1 -> {
@@ -297,6 +298,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                             .visible(false)
                     )
                     marker.tag = place
+                    Log.d("addMarkers!!!!","2")
                     myMarkers.add(marker)
                 }
                 2 -> {
@@ -309,6 +311,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     )
                     marker.tag = place
                     myMarkers.add(marker)
+                    Log.d("addMarkers!!!!","2.1")
                 }
                 3 -> {
                     val marker = mMap.addMarker(
@@ -317,11 +320,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                             .position(place.latLng)
                             .icon(alertThreeIcon)
                             .visible(false)
+
                     )
                     // Set place as the tag on the marker object so it can be referenced within
                     // MarkerInfoWindowAdapter
                     marker.tag = place
                     myMarkers.add(marker)
+                    Log.d("addMarkers!!!!","2.2")
                 }
 
             }
