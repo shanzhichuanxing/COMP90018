@@ -60,6 +60,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var levelOneBtn:View
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
+
+    // modify by iris
+    private lateinit var mainMenuBtn:View
+    private lateinit var infoBtn:View
+
+
+
     private lateinit var reCenterButton:View
 
     var isPermissionGranted = false
@@ -105,7 +112,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             addMarkers()
             mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
         }
- 
+
 
 
         if (isPermissionGranted)
@@ -120,6 +127,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
+
+        // modify by iris
+        mainMenuBtn=findViewById(R.id.mainMenu)
+        infoBtn=findViewById(R.id.info)
+
+
+
+        infoBtn.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this@MapsActivity, InfoActivity::class.java)
+            startActivity(intent)
+        })
+
+        mainMenuBtn.setOnClickListener{
+            onAddButtonClicked_main()
+        }
+
+
+
+
+
+        //////////
+
+
 
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
@@ -165,6 +195,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setAnimation(clicked)
         clicked = !clicked
     }
+    //iris
+    private fun onAddButtonClicked_main() {
+        setVisibility_main(clicked)
+        setAnimation_main(clicked)
+        clicked = !clicked
+    }
+
+    private fun setVisibility_main(clicked: Boolean){
+        if(!clicked){
+            // iris
+            traceMenuButton.visibility=View.VISIBLE
+            infoBtn.visibility=View.VISIBLE
+        }else{
+            // iris
+            traceMenuButton.visibility=View.INVISIBLE
+            infoBtn.visibility=View.INVISIBLE
+        }
+    }
+
+    private fun setAnimation_main(clicked: Boolean){
+        if(!clicked){
+            //iris
+            infoBtn.startAnimation(fromBottom)
+            traceMenuButton.startAnimation(fromBottom)
+            mainMenuBtn.startAnimation(rotateOpen)
+        }else{
+            infoBtn.startAnimation(toBottom)
+            traceMenuButton.startAnimation(toBottom)
+            mainMenuBtn.startAnimation(rotateClose)
+
+        }
+    }
+    /////
 
     private fun setVisibility(clicked: Boolean) {
 
@@ -172,10 +235,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             levelOneBtn.visibility = View.VISIBLE
             levelTwoBtn.visibility = View.VISIBLE
             levelThreeBtn.visibility = View.VISIBLE
+
         }else{
             levelOneBtn.visibility = View.INVISIBLE
             levelTwoBtn.visibility = View.INVISIBLE
             levelThreeBtn.visibility = View.INVISIBLE
+
         }
 
     }
@@ -187,11 +252,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             levelTwoBtn.startAnimation(fromBottom)
             levelThreeBtn.startAnimation(fromBottom)
             layerButton.startAnimation(rotateOpen)
+
         }else{
             levelOneBtn.startAnimation(toBottom)
             levelTwoBtn.startAnimation(toBottom)
             levelThreeBtn.startAnimation(toBottom)
             layerButton.startAnimation(rotateClose)
+
         }
     }
 

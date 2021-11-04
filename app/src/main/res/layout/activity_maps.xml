@@ -20,9 +20,10 @@
         tools:visibility="visible">
 
         <include
+            android:id="@+id/include"
             layout="@layout/floating_searchbar"
             tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="-16dp" />
+            tools:layout_editor_absoluteY="0dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/levelTwoBtn"
@@ -37,7 +38,7 @@
             app:layout_constraintBottom_toTopOf="@+id/levelOneBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/tier2"
-            app:tint ="@null"/>
+            app:tint="@null" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/layerButton"
@@ -46,12 +47,12 @@
             android:layout_marginStart="312dp"
             android:layout_marginBottom="52dp"
             android:clickable="true"
-            app:backgroundTint="@color/teal_200"
+            android:focusable="true"
+            app:backgroundTint="@color/blue_dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/danger"
-            app:tint="@null"
-            android:focusable="true" />
+            app:tint="@null" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/levelOneBtn"
@@ -66,7 +67,7 @@
             app:layout_constraintBottom_toTopOf="@+id/layerButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/tier1"
-            app:tint="@null"/>
+            app:tint="@null" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/levelThreeBtn"
@@ -81,8 +82,7 @@
             app:layout_constraintBottom_toTopOf="@+id/levelTwoBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/tier3"
-            app:tint="@null"
-            />
+            app:tint="@null" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/location"
@@ -91,22 +91,44 @@
             android:layout_marginStart="32dp"
             android:layout_marginBottom="52dp"
             android:clickable="true"
+            android:focusable="true"
+            app:backgroundTint="@color/blue_dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/relocate"
-            app:tint="@null"
-            android:focusable="true" />
+            app:tint="@null" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/traceMenu"
-            android:layout_width="36dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="348dp"
-            android:layout_marginBottom="536dp"
+            android:layout_width="55dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="460dp"
             android:clickable="true"
+            android:visibility="invisible"
+            app:backgroundTint="@color/blue_dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/trace"
+            app:layout_constraintTop_toBottomOf="@+id/include"
+            app:layout_constraintVertical_bias="0.916"
+            app:srcCompat="@drawable/ic_track_white"
+            app:tint="@null" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/info"
+            android:layout_width="55dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="480dp"
+            android:clickable="true"
+            android:visibility="invisible"
+            app:backgroundTint="@color/blue_dark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_baseline_info_24"
             app:tint="@null" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

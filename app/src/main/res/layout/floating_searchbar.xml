@@ -2,16 +2,32 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center">
 
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/mainMenu"
+        android:layout_width="57dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:clickable="true"
+        app:backgroundTint="@color/blue_dark"
+        app:layout_constraintEnd_toStartOf="@+id/cardView"
+        app:layout_constraintHorizontal_bias="0.333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_main_menu_white"
+        app:tint="@null" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="32dp"
-        android:layout_marginStart="60dp"
+        android:layout_marginStart="90dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="60dp"
         app:cardCornerRadius="12dp"
@@ -33,7 +49,7 @@
                 android:src="@android:drawable/ic_search_category_default"
                 android:visibility="visible"
                 app:srcCompat="@android:drawable/ic_search_category_default"
-                app:tint="@color/teal_200"/>
+                app:tint="@color/blue_dark" />
 
             <TextView
                 android:id="@+id/searchBox"
@@ -43,7 +59,7 @@
                 android:ellipsize="start"
                 android:gravity="center_vertical"
                 android:hint="Search for location..."
-                app:backgroundTint="@color/teal_200"/>
+                app:backgroundTint="@color/teal_200" />
 
         </LinearLayout>
 
