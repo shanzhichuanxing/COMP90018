@@ -116,7 +116,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
-            intent.putExtra("markersOptions",myMarkerOptions)
+            intent.apply {
+                putExtra("places", places)
+            }
             startActivity(intent)
         })
         reCenterButton.setOnClickListener{
@@ -275,36 +277,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         places.forEach{ place ->
             when (place.alert_level) {
                 1 -> {
-
-                    val marker = mMap.addMarker(MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertOneIcon)
-                        .visible(false))
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(LatLng(place.lat, place.lng))
+                            .icon(alertOneIcon)
+                            .visible(false)
+                    )
                     marker.tag = place
                     myMarkers.add(marker)
 
                 }
                 2 -> {
-
-                    val marker = mMap.addMarker(MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertTwoIcon)
-                        .visible(false))
-
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(LatLng(place.lat, place.lng))
+                            .icon(alertTwoIcon)
+                            .visible(false)
+                    )
                     marker.tag = place
                     myMarkers.add(marker)
 
                 }
                 3 -> {
+                    val marker = mMap.addMarker(
+                        MarkerOptions()
+                            .title(place.name)
+                            .position(LatLng(place.lat, place.lng))
+                            .icon(alertThreeIcon)
+                            .visible(false)
 
-
-                    val marker = mMap.addMarker(MarkerOptions()
-                        .title(place.name)
-                        .position(place.latLng)
-                        .icon(alertThreeIcon)
-                        .visible(false))
+                    )
+                    // Set place as the tag on the marker object so it can be referenced within
+                    // MarkerInfoWindowAdapter
                     marker.tag = place
                     myMarkers.add(marker)
 
