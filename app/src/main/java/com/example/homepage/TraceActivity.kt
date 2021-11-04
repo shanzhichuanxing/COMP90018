@@ -37,7 +37,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dayOfMonth: String
 
     private lateinit var traceDays: DataSnapshot
-    private lateinit var places: Array<Place>
+    var myMarkerOptions = ArrayList<MarkerOptions>()
 
 
     private val alertOneIcon: BitmapDescriptor by lazy {
@@ -65,9 +65,9 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         backButton.setOnClickListener {
             finish()
         }
-        places = intent.getSerializableExtra("places") as Array<Place>
-        var attachments = places.toCollection(ArrayList())
-        Log.d("extras",attachments.toString())
+
+
+
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth.currentUser!!.uid
         Log.d("UserIDs:", userID)
@@ -136,16 +136,8 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             .addAll(
                 posList))
             polyline1.tag = "A"
-
             //resizing to fit all markers
-            val b = LatLngBounds.Builder()
-            for (m in markerList) {
-                b.include(m.position)
-            }
-
-            val bounds = b.build()
-            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 200, 200, 30)
-            mMap.animateCamera(cu)
+            MapsActivity().rebounds(markerList)
 
         }
     }
