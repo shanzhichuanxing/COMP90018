@@ -8,8 +8,6 @@ import com.example.homepage.utils.addressToLocation
 import java.io.IOException
 import java.net.URL
 import java.util.ArrayList
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class CaseAlert {
     private var cases: ArrayList<Case>? = null
@@ -37,33 +35,18 @@ class CaseAlert {
         return places
     }
 
-    fun getCases(): ArrayList<Case>? {
-
-        if (cases == null) {
-            initializeCasesAddress()
+    private fun getCases(): ArrayList<Case>? {
+        initializeCasesAddress()
+        try {
+            fetchData().join()
+        } catch (e: Exception) {
+            e.stackTrace
         }
-
         return cases
     }
 
     private fun initializeCasesAddress() {
-
-        var a = fetchData();
-        // use scheduled Executed service to reduce sleeping tasks
-        val scheduler = Executors.newScheduledThreadPool(1)
-        scheduler.scheduleAtFixedRate(fetchData(), 0, 1, TimeUnit.DAYS)
-        if (cases == null) {
-            Log.i(TAG, "fetchData start")
-            a.start()
-        }
-
-        try {
-            a.join()
-        } catch (e: Exception) {
-            e.stackTrace
-        }
-        Log.i(TAG, "fetchData end: " + cases!!.size);
-
+        fetchData().start();
     }
 
     internal inner class fetchData : Thread() {
