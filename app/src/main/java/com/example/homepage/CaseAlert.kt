@@ -23,10 +23,12 @@ class CaseAlert {
                 "Tier2" -> { alert_level = 2 }
                 "Tier3" -> { alert_level = 3 }
             }
+            var address = addressToLocation.getLocationFromAddress(context, case.siteTitle + ", " + case.siteStreet)
             places.add(
                 Place(
                     case.siteTitle,
-                    addressToLocation.getLocationFromAddress(context, case.siteTitle + ", " + case.siteStreet),
+                    address.latitude,
+                    address.longitude,
                     case.siteStreet + ", " + case.siteState + " " + case.sitePostcode,
                     alert_level
                 )

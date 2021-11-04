@@ -123,7 +123,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
-            intent.putExtra("places",places)
+            intent.apply {
+                putExtra("places", places)
+            }
             startActivity(intent)
         })
         reCenterButton.setOnClickListener{
@@ -253,7 +255,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertOneIcon)
                             .visible(false)
                     )
@@ -264,7 +266,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertTwoIcon)
                             .visible(false)
                     )
@@ -275,7 +277,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertThreeIcon)
                             .visible(false)
 

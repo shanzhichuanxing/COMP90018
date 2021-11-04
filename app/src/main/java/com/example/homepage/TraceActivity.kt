@@ -37,8 +37,8 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dayOfMonth: String
 
     private lateinit var traceDays: DataSnapshot
-    private lateinit var places: Array<Place>
-
+    private lateinit var attachments: ArrayList<Place>
+    private lateinit var places: ArrayList<Place>
 
     private val alertOneIcon: BitmapDescriptor by lazy {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
@@ -65,9 +65,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         backButton.setOnClickListener {
             finish()
         }
-        places = intent.getSerializableExtra("places") as Array<Place>
-        var attachments = places.toCollection(ArrayList())
-        Log.d("extras",attachments.toString())
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth.currentUser!!.uid
         Log.d("UserIDs:", userID)
@@ -160,13 +157,17 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(googleMap: GoogleMap) {
+
+        attachments = intent.getSerializableExtra("places") as ArrayList<Place>
+        places = attachments.toCollection(ArrayList())
+        Log.d("extras",places.toString())
+
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-        Log.d("MyMarker", MapsActivity().myMarkers.toString())
         addMarkers()
     }
     /**
@@ -174,14 +175,13 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     private fun addMarkers() {
 
-        MapsActivity().myMarkers.forEach { marker ->
-           var place = marker.tag as Place
+        places.forEach { place ->
            when (place.alert_level) {
                1 -> {
                    val marker = mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
-                           .position(place.latLng)
+                           .position(LatLng(place.lat, place.lng))
                            .icon(alertOneIcon)
                            .visible(true)
                    )
@@ -190,7 +190,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                    val marker = mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
-                           .position(place.latLng)
+                           .position(LatLng(place.lat, place.lng))
                            .icon(alertTwoIcon)
                            .visible(true)
                    )
@@ -199,7 +199,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                    val marker = mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
-                           .position(place.latLng)
+                           .position(LatLng(place.lat, place.lng))
                            .icon(alertThreeIcon)
                            .visible(true)
                    )
