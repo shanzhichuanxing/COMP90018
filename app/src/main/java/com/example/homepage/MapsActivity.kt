@@ -142,52 +142,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 supportMapFragment!!.getMapAsync(this)
             }
         }
-//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//        if (ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_COARSE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//                // Success
-//            fusedLocationClient.lastLocation
-//                .addOnSuccessListener { location : Location? ->
-//                    // Got last known location. In some rare situations this can be null.
-//                    Log.d("LastLocation",location.toString())
-//                    mCurrentLocation= location;// initialises
-//                }
-//            return
-//        }
-//        else{
-//            //no permission yet
-//
-//            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.M){
-//                requestPermissions(Manifest.permission.ACCESS_FINE_LOCATION.toCharArray().map { it.toString() }.toTypedArray(),PERMISSIONS_FINE_LOCATION)
-//            }
-//        }
-
-
-        //get location
-//        mLocationCallback = object : LocationCallback() {
-//            override fun onLocationResult(locationResult: LocationResult?) {
-//                Log.d("UpdateLocation","called")
-//                locationResult ?: return
-//                for (location in locationResult.locations){
-//                    Log.d("UpdateLocation",location.toString())
-//                    // Update UI with location data
-//                    // ...
-//                }
-//            }
-//        }
 
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
@@ -203,6 +157,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             startActivity(intent)
         })
         reCenterButton.setOnClickListener{
+            if (mCurrentLocation == null) {
+                Log.d("reCenterButton","Null current location")
+                return@setOnClickListener
+            }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLocation?.let { it1 ->
                 LatLng(
                     it1.latitude, mCurrentLocation!!.longitude)
@@ -296,10 +254,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            mMap.isMyLocationEnabled = true
-            mMap.uiSettings.isMyLocationButtonEnabled = true
-            mMap.uiSettings.isMapToolbarEnabled = false
-            mMap.uiSettings.isIndoorLevelPickerEnabled = false
+
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -320,7 +275,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         if (myLocation==null){
             myLocation = melbourne
         }
-        mMap.addMarker(myLocation?.let { MarkerOptions().position(it).title("Current Location") })
+
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15f))
     }
 
@@ -388,13 +343,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         val time = timef.format(calendarTime)
         return arrayOf(date, time)
     }
-    private fun createLocationRequest() {
-        mLocationRequest = LocationRequest.create()?.apply {
-            interval = 10000
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-    }
+
 //    private fun writeLocToDB(location:Location){
 //        val array: Array<String> = getGPSLocalTime(location.getTime())
 //        val date = array[0]
@@ -431,36 +380,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
 //            mLocationCallback,
 //            Looper.getMainLooper())
 //    }
-    private fun setUpGPS(){
-        createLocationRequest()
-        val builder = mLocationRequest?.let {
-            LocationSettingsRequest.Builder()
-                .addLocationRequest(it)
-        }
-        val client: SettingsClient = LocationServices.getSettingsClient(this)
-        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
-        task.addOnSuccessListener { locationSettingsResponse ->
-            // All location settings are satisfied. The client can initialize
-            // location requests here.
-            // ...
-        }
 
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException){
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(this@MapsActivity,
-                        REQUEST_CHECK_SETTINGS)
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    // Ignore the error.
-                }
-            }
-        }
-
-    }
     private fun checkMyPermission() {
         Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
@@ -518,7 +438,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
 
     override fun onLocationChanged(location: Location) {
         try {
-            mMap.clear()
+
             val array = getGPSLocalTime(location.time)
             val date = "2021-11-01"
             val time = array[1]

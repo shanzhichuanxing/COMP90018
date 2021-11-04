@@ -178,7 +178,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
-        mMap.addMarker(MarkerOptions().position(melbourne).title("Marker in Melbourne"))
+
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
 
     }
