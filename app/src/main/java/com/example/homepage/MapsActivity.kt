@@ -11,14 +11,14 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.model.LatLng
@@ -45,10 +45,13 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_maps.*
+import kotlinx.android.synthetic.main.floating_searchbar.*
+import java.io.IOException
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.log
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
@@ -60,6 +63,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var places = ArrayList<Place>()
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    // serach bar
+    private lateinit var searchBar:SearchView
+    private lateinit var searchText:TextView
+    private lateinit var searchIcon:ImageView
+    private lateinit var cardView:CardView
+    private lateinit var code:String
+
 
     private lateinit var levelThreeBtn:View
     private lateinit var levelTwoBtn:View
@@ -103,16 +113,48 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         checkMyPermission()
         isGPSEnabled()
 
+
+        searchBar=findViewById(R.id.searchBar)
+        searchText=findViewById(R.id.searchBox)
+        searchIcon=findViewById(R.id.search)
+        cardView=findViewById(R.id.cardView)
+
         if (isPermissionGranted)
         {
             val supportMapFragment =
                 supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
             supportMapFragment!!.getMapAsync(this)
+
+
             supportMapFragment.getMapAsync {
                 addMarkers()
                 mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
             }
         }
+
+        //////////////////////
+        searchIcon.setOnClickListener(View.OnClickListener {
+            var searchTxt: String = searchText.getText().toString().trim()
+            var addressList: List<Address>? = null
+
+            if(!TextUtils.isEmpty(searchTxt)){
+                val geocoder = Geocoder(this@MapsActivity)
+                try{
+                    addressList=geocoder.getFromLocationName(searchTxt,1)
+                } catch (e:NumberFormatException) {
+                    e.printStackTrace()
+                }
+                val address = addressList?.get(0)
+                address?.let { it1 -> gotoLocation(it1.latitude,address.longitude) }
+
+
+                // the string searchTxt should pass to
+                //val latLng = address?.let { it1 -> LatLng(it1.latitude, address.longitude) }
+                }
+        })
+
+        /////////////////////////////////
+
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
@@ -381,4 +423,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
     }
 }
+
 
