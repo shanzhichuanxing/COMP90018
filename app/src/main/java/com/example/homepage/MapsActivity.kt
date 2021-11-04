@@ -14,7 +14,10 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
+
+
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -44,6 +47,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
     private val  rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close) }
     private val  fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom) }
@@ -77,6 +82,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var userID: String? = null
     //fab = findViewById(R.id.fab);
 
+    // search bar
+
+
+
+
     var myMarkers = ArrayList<Marker>()
 
     private val alertOneIcon: BitmapDescriptor by lazy {
@@ -105,7 +115,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             addMarkers()
             mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
         }
- 
+
+        // search box////////////////////////
+
+
+
+
+
+
 
 
         if (isPermissionGranted)

@@ -7,6 +7,7 @@
     android:padding="12dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white_background"
     tools:context=".RegisterActivity">
 
     <ImageView
@@ -33,6 +34,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15sp"
+        android:background="@android:color/transparent"
+        android:textColor="@color/blue_dark"
         android:text="LOGIN"
         android:padding="10dp"
         android:id="@+id/login"/>
@@ -40,7 +43,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New to Instagram? Register"
+        android:text="New to CovidSafe? Register"
         android:layout_marginTop="15dp"
         android:id="@+id/register_user"/>
 
