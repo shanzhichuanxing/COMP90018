@@ -64,6 +64,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val TAG = "MapsActivity"
     private var places = ArrayList<Place>()
     private val REQUEST_CHECK_SETTINGS = 0x1
+    private val PERMISSIONS_FINE_LOCATION = 444
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
@@ -158,14 +159,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+                // Success
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location : Location? ->
+                    // Got last known location. In some rare situations this can be null.
+                    Log.d("LastLocation",location.toString())
+                    mCurrentLocation= location;// initialises
+                }
             return
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                // Got last known location. In some rare situations this can be null.
-                Log.d("LastLocation",location.toString())
-                mCurrentLocation= location;// initialises
+        else{
+            //no permission yet
+
+            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.M){
+                requestPermissions(Manifest.permission.ACCESS_FINE_LOCATION.toCharArray().map { it.toString() }.toTypedArray(),PERMISSIONS_FINE_LOCATION)
             }
+        }
+
+
         //get location
         mLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
