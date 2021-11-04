@@ -134,7 +134,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                 posList))
             polyline1.tag = "A"
             //resizing to fit all markers
-            MapsActivity().rebounds(markerList)
+            MapsActivity().rebounds(markerList,mMap)
 
         }
     }

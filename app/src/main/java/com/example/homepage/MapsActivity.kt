@@ -136,73 +136,67 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
 
         levelOneBtn.setOnClickListener{
-            var tierMarkerList = ArrayList<Marker>()
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 1) {
-                    marker.isVisible = !marker.isVisible
-                    tierMarkerList.add(marker)
-                }
-            }
-            if(tierMarkerList.size == 0){
-                Toast.makeText(this, "No tier 1 exposure sites",Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            Toast.makeText(this, "Showing tier 1 exposure sites",Toast.LENGTH_SHORT).show()
-            rebounds(tierMarkerList)
+            buttonTierResponse(1)
         }
         levelTwoBtn.setOnClickListener{
-            var tierMarkerList = ArrayList<Marker>()
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 2) {
-                    marker.isVisible = !marker.isVisible
-                    tierMarkerList.add(marker)
-                }
-
-            }
-
-            if(tierMarkerList.size == 0){
-                Toast.makeText(this, "No tier 2 exposure sites",Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            Toast.makeText(this, "Showing tier 2 exposure sites",Toast.LENGTH_SHORT).show()
-            rebounds(tierMarkerList)
+            buttonTierResponse(2)
         }
         levelThreeBtn.setOnClickListener{
-            var tierMarkerList = ArrayList<Marker>()
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 3) {
-                    marker.isVisible = !marker.isVisible
-                    tierMarkerList.add(marker)
-                }
-            }
-            if(tierMarkerList.size == 0){
-                Toast.makeText(this, "No tier 3 exposure sites",Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            Toast.makeText(this, "Showing tier 3 exposure sites",Toast.LENGTH_SHORT).show()
-            rebounds(tierMarkerList)
+           buttonTierResponse(3)
         }
+
     }
-    fun rebounds(tierMarkerList: ArrayList<Marker>){
+    /**
+     *Logic for every exposure tier button.hides/shows button. rebounds at the end
+     */
+    private fun buttonTierResponse(tier:Int){
+        var tierMarkerList = ArrayList<Marker>()
+        var show = false
+        myMarkers.forEach { marker ->
+            var place = marker.tag as Place
+            if (place.alert_level == tier) {
+                marker.isVisible = !marker.isVisible
+                tierMarkerList.add(marker)
+                if(marker.isVisible)show=true
+            }
+        }
+        if(tierMarkerList.size == 0){
+            Toast.makeText(this, "No tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+            return
+        }
+        if(show){
+            Toast.makeText(this, "Showing tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(this, "Hiding tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+        }
+
+        rebounds(tierMarkerList,mMap)
+    }
+    /**
+     *Resets camera view to bound all tier markers in a list
+     */
+    fun rebounds(tierMarkerList: ArrayList<Marker>, mMap:GoogleMap){
         val b = LatLngBounds.Builder()
         for (m in tierMarkerList) {
             b.include(m.position)
         }
 
         val bounds = b.build()
-        val cu = CameraUpdateFactory.newLatLngBounds(bounds, 1500, 1000, 10)
+        val cu = CameraUpdateFactory.newLatLngBounds(bounds, 800, 800, 10)
         mMap.animateCamera(cu)
     }
-
+    /**
+     *Action for FAB tray
+     */
     private fun onAddButtonClicked() {
         setVisibility(clicked)
         setAnimation(clicked)
         clicked = !clicked
     }
 
+    /**
+     *Sets visibility for FAB
+     */
     private fun setVisibility(clicked: Boolean) {
 
         if(!clicked){
@@ -216,7 +210,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
 
     }
-
+    /**
+     *Sets animation for FAB
+     */
     private fun setAnimation(clicked: Boolean) {
 
         if(!clicked){
@@ -395,7 +391,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         try {
 
             val array = getGPSLocalTime(location.time)
-            val date = "2021-11-01"
+            val date = array[0]
             val time = array[1]
             val lat = location.latitude
             val lng = location.longitude
