@@ -3,10 +3,14 @@ package com.example.homepage
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.location.*
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -15,6 +19,9 @@ import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -22,16 +29,20 @@ import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.tasks.Task
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -52,7 +63,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var clicked = false;
     private val TAG = "MapsActivity"
     private var places = ArrayList<Place>()
-
+    private val REQUEST_CHECK_SETTINGS = 0x1
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
@@ -71,15 +82,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val mLocationClient: FusedLocationProviderClient? = null
     var locSearch: EditText? = null
     var searchIcon: ImageButton? = null
-    private val mLocationCallback: LocationCallback? = null
-    private val mLocationRequest: LocationRequest? = null
+    private var mLocationCallback: LocationCallback? = null
+    private var mLocationRequest: LocationRequest? = null
     var locationManager: LocationManager? = null
     private var mDatabase: DatabaseReference? = null
     private var mAuth: FirebaseAuth? = null
     private var userID: String? = null
     //fab = findViewById(R.id.fab);
-
+    private var mCurrentLocation: Location? = null
     var myMarkers = ArrayList<Marker>()
+
 
     private val alertOneIcon: BitmapDescriptor by lazy {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
@@ -93,6 +105,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier3)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -115,7 +128,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth!!.currentUser!!.uid
         mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
-        checkMyPermission()
+        setUpGPS()
+
+
+
 
 
         if (isPermissionGranted)
@@ -127,13 +143,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location : Location? ->
                 // Got last known location. In some rare situations this can be null.
-                Log.d("LastLocation","location"+location.toString())
+                Log.d("LastLocation",location.toString())
+                mCurrentLocation= location;// initialises
             }
         //get location
-
+        mLocationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                Log.d("UpdateLocation","called")
+                locationResult ?: return
+                for (location in locationResult.locations){
+                    Log.d("UpdateLocation",location.toString())
+                    // Update UI with location data
+                    // ...
+                }
+            }
+        }
 
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
@@ -324,7 +368,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val time = timef.format(calendarTime)
         return arrayOf(date, time)
     }
-
+    private fun createLocationRequest() {
+        mLocationRequest = LocationRequest.create()?.apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+    }
     private fun writeLocToDB(location:Location){
         val array: Array<String> = getGPSLocalTime(location.getTime())
         val date = array[0]
@@ -334,7 +384,63 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
         mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
     }
+    override fun onResume() {
+        super.onResume()
+        if (isPermissionGranted) startLocationUpdates()
+    }
 
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(mLocationRequest,
+            mLocationCallback,
+            Looper.getMainLooper())
+    }
+    private fun setUpGPS(){
+        createLocationRequest()
+        val builder = mLocationRequest?.let {
+            LocationSettingsRequest.Builder()
+                .addLocationRequest(it)
+        }
+        val client: SettingsClient = LocationServices.getSettingsClient(this)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException){
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@MapsActivity,
+                        REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+
+    }
 
 }
 

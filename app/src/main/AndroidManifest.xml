@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
 
     <application
@@ -37,6 +38,7 @@
             android:name=".MapsActivity"
             android:exported="true"
             android:label="Zones">
+
         </activity>
         <activity
             android:name=".TraceActivity"
@@ -69,7 +71,13 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-
+        <service
+            android:name=".MapsActivity"
+            android:exported="true"
+            android:label="Zones">
+            android:foregroundServiceType="location"  >
+            <!-- Any inner elements would go here. -->
+        </service>
     </application>
 
 </manifest>
