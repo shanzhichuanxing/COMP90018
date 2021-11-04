@@ -1,33 +1,14 @@
 package com.example.homepage
 
-
-import com.google.android.gms.maps.GoogleMap.OnPolygonClickListener
-import com.google.android.gms.maps.GoogleMap.OnPolylineClickListener
-
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CustomCap
-import com.google.android.gms.maps.model.Dash
-import com.google.android.gms.maps.model.Dot
-import com.google.android.gms.maps.model.Gap
-import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PatternItem
-import com.google.android.gms.maps.model.Polygon
-import com.google.android.gms.maps.model.PolygonOptions
-import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.android.gms.maps.model.RoundCap
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Button
 import android.widget.CalendarView
 import android.widget.Toast
-import androidx.annotation.NonNull
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -39,14 +20,12 @@ import com.example.homepage.utils.BitmapHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.model.*
 
 
 class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
     private lateinit var backButton: View
     private lateinit var calendar:CalendarView
     private lateinit var mDatabase: DatabaseReference
@@ -95,21 +74,16 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val menuListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-
                 traceDays = dataSnapshot //gets the location at different times of each day
                 Log.d("TD----------------:", "traceDays: " + traceDays.getValue())
-
             }
-
             override fun onCancelled(databaseError: DatabaseError) {
                 // handle error
             }
         }
         ref.addListenerForSingleValueEvent(menuListener)
 
-
-
-        calendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
+        calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
@@ -137,9 +111,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             val markers = days!!.children // all the markers in a single day
 
-
-
-
             var markerList:ArrayList<Marker> = ArrayList()
             var posList:ArrayList<LatLng> = ArrayList()
             //add the markers at each (time, location) combo for each child
@@ -162,8 +133,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             .addAll(
                 posList))
             polyline1.tag = "A"
-            // Style the polyline.
-
 
             //resizing to fit all markers
             val b = LatLngBounds.Builder()
@@ -176,7 +145,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.animateCamera(cu)
 
         }
-
     }
 
     /**

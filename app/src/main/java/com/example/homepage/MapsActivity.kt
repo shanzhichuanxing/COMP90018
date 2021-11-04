@@ -3,7 +3,6 @@ package com.example.homepage
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.*
 import android.location.LocationListener
@@ -11,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -20,7 +18,6 @@ import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 
@@ -30,14 +27,11 @@ import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.tasks.Task
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
@@ -64,8 +58,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var clicked = false;
     private val TAG = "MapsActivity"
     private var places = ArrayList<Place>()
-    private val REQUEST_CHECK_SETTINGS = 0x1
-    private val PERMISSIONS_FINE_LOCATION = 444
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
@@ -75,22 +67,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
     private lateinit var reCenterButton:View
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     var isPermissionGranted = false
-    var isProviderEnabled = false
 
-    var fab: FloatingActionButton? = null
-    private val mLocationClient: FusedLocationProviderClient? = null
-    var locSearch: EditText? = null
-    var searchIcon: ImageButton? = null
-    private var mLocationCallback: LocationCallback? = null
-    private var mLocationRequest: LocationRequest? = null
     var locationManager: LocationManager? = null
     private var mDatabase: DatabaseReference? = null
     private var mAuth: FirebaseAuth? = null
     private var userID: String? = null
-    //fab = findViewById(R.id.fab);
     private var mCurrentLocation: Location? = null
     var myMarkers = ArrayList<Marker>()
 
@@ -114,42 +97,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-        mapFragment.getMapAsync {
-            addMarkers()
-            mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
-        }
-
-        //fab = findViewById(R.id.fab);
-//        locSearch = findViewById(R.id.et_search);
-//        searchIcon = findViewById(R.id.search_icon);
-        //adding haoyue
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth!!.currentUser!!.uid
         mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
         checkMyPermission()
         isGPSEnabled()
 
-
         if (isPermissionGranted)
         {
-            if (isProviderEnabled) {
-                val supportMapFragment =
-                    supportFragmentManager.findFragmentById(R.id.fragment) as SupportMapFragment?
-                supportMapFragment!!.getMapAsync(this)
+            val supportMapFragment =
+                supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+            supportMapFragment!!.getMapAsync(this)
+            supportMapFragment.getMapAsync {
+                addMarkers()
+                mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
             }
         }
-
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
         reCenterButton= findViewById(R.id.location)
-
 
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
@@ -255,14 +224,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
         mMap.isMyLocationEnabled = true
@@ -284,9 +245,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
      * Adds marker representations of the places list on the provided GoogleMap object
      */
     private fun addMarkers() {
-        Log.d("addMarkers!!!!","1")
         places = CaseAlert().getPlaces(this)!!;
-        Log.d("addMarkers!!!!","1.1" + places)
         places.forEach{ place ->
             when (place.alert_level) {
                 1 -> {
@@ -298,7 +257,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                             .visible(false)
                     )
                     marker.tag = place
-                    Log.d("addMarkers!!!!","2")
                     myMarkers.add(marker)
                 }
                 2 -> {
@@ -311,7 +269,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     )
                     marker.tag = place
                     myMarkers.add(marker)
-                    Log.d("addMarkers!!!!","2.1")
                 }
                 3 -> {
                     val marker = mMap.addMarker(
@@ -326,7 +283,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     // MarkerInfoWindowAdapter
                     marker.tag = place
                     myMarkers.add(marker)
-                    Log.d("addMarkers!!!!","2.2")
                 }
 
             }
@@ -348,43 +304,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         val time = timef.format(calendarTime)
         return arrayOf(date, time)
     }
-
-//    private fun writeLocToDB(location:Location){
-//        val array: Array<String> = getGPSLocalTime(location.getTime())
-//        val date = array[0]
-//        val time = array[1]
-//        val lat: Double = location.getLatitude()
-//        val lng: Double = location.getLongitude()
-//        mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
-//        mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
-//    }
-//    override fun onResume() {
-//        super.onResume()
-//        if (isPermissionGranted) startLocationUpdates()
-//    }
-
-//    private fun startLocationUpdates() {
-//        if (ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_COARSE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            return
-//        }
-//        fusedLocationClient.requestLocationUpdates(mLocationRequest,
-//            mLocationCallback,
-//            Looper.getMainLooper())
-//    }
 
     private fun checkMyPermission() {
         Dexter.withContext(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -439,7 +358,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             this
         )
     }
-
 
     override fun onLocationChanged(location: Location) {
         try {
