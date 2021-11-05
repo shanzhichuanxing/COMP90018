@@ -11,9 +11,13 @@ import java.util.ArrayList
 
 class CaseAlert {
     private var cases: ArrayList<Case>? = null
+    var places = ArrayList<Place>()
 
     fun getPlaces(context: Context): ArrayList<Place>? {
-        var places = ArrayList<Place>()
+        if (places.size != 0) {
+            return places
+        }
+
         cases = getCases()
 
         cases?.forEach{ case ->

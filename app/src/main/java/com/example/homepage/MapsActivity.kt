@@ -42,12 +42,10 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.floating_searchbar.*
-import java.io.IOException
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.log
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
@@ -59,15 +57,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var places = ArrayList<Place>()
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
-    // serach bar
-    //private lateinit var searchBar:SearchView
+
     private lateinit var searchText:TextView
     private lateinit var searchIcon:ImageView
     private lateinit var cardView:CardView
-    private lateinit var code:String
 
     private lateinit var infoBtn:View
-    private lateinit var traceBtn:View
 
 
     private lateinit var levelThreeBtn:View
@@ -85,7 +80,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var userID: String? = null
     private var mCurrentLocation: Location? = null
     var myMarkers = ArrayList<Marker>()
-    var myMarkerOptions = ArrayList<MarkerOptions>()
 
     private val alertOneIcon: BitmapDescriptor by lazy {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
@@ -112,70 +106,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         checkMyPermission()
         isGPSEnabled()
 
-
-        //searchBar=findViewById(R.id.searchBar)
         infoBtn=findViewById(R.id.infoMenu)
         traceMenuButton=findViewById(R.id.traceMenu)
         searchText=findViewById(R.id.searchBox)
         searchIcon=findViewById(R.id.search)
         cardView=findViewById(R.id.cardView)
 
-        infoBtn.setOnClickListener(View.OnClickListener {
+        infoBtn.setOnClickListener {
             val intent = Intent(this@MapsActivity, InfoActivity::class.java)
             startActivity(intent)
-        })
-
-        if (isPermissionGranted)
-        {
-            val supportMapFragment =
-                supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-            supportMapFragment!!.getMapAsync(this)
-
-
-            supportMapFragment.getMapAsync {
-                addMarkers()
-                mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
-            }
         }
 
-        //////////////////////
-        searchIcon.setOnClickListener(View.OnClickListener {
+        searchIcon.setOnClickListener {
             var searchTxt: String = searchText.getText().toString().trim()
             var addressList: List<Address>? = null
 
-            if(!TextUtils.isEmpty(searchTxt)){
+            if (!TextUtils.isEmpty(searchTxt)) {
                 val geocoder = Geocoder(this@MapsActivity)
-                try{
-                    addressList=geocoder.getFromLocationName(searchTxt,1)
-                } catch (e:NumberFormatException) {
+                try {
+                    addressList = geocoder.getFromLocationName(searchTxt, 1)
+                } catch (e: NumberFormatException) {
                     e.printStackTrace()
                 }
                 val address = addressList?.get(0)
-                address?.let { it1 -> gotoLocation(it1.latitude,address.longitude) }
-
-
-                // the string searchTxt should pass to
-                //val latLng = address?.let { it1 -> LatLng(it1.latitude, address.longitude) }
-                }
-        })
-
-        /////////////////////////////////
-
+                address?.let { it1 -> gotoLocation(it1.latitude, address.longitude) }
+            }
+        }
 
         levelThreeBtn= findViewById(R.id.levelThreeBtn)
         levelTwoBtn= findViewById(R.id.levelTwoBtn)
         levelOneBtn= findViewById(R.id.levelOneBtn)
         layerButton= findViewById(R.id.layerButton)
         reCenterButton= findViewById(R.id.location)
-
         traceMenuButton = findViewById(R.id.traceMenu)
-        traceMenuButton.setOnClickListener(View.OnClickListener {
+
+        traceMenuButton.setOnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
             intent.apply {
                 putExtra("places", places)
             }
             startActivity(intent)
-        })
+        }
         reCenterButton.setOnClickListener{
             if (mCurrentLocation == null) {
                 Log.d("reCenterButton","Null current location")
@@ -212,7 +183,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             if (place.alert_level == tier) {
                 marker.isVisible = !marker.isVisible
                 tierMarkerList.add(marker)
-                if(marker.isVisible)show=true
+                if (marker.isVisible) show = true
             }
         }
         if(tierMarkerList.size == 0){
@@ -324,7 +295,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
      * Adds marker representations of the places list on the provided GoogleMap object
      */
     private fun addMarkers() {
-        places = CaseAlert().getPlaces(this)!!;
+        places = CaseAlert().getPlaces(this)!!
         places.forEach{ place ->
             when (place.alert_level) {
                 1 -> {
@@ -364,8 +335,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     // MarkerInfoWindowAdapter
                     marker.tag = place
                     myMarkers.add(marker)
-
-
                 }
 
             }
@@ -396,6 +365,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                         .show()
                     isPermissionGranted = true
                     getLocationUpdates()
+
+                    if (isPermissionGranted)
+                    {
+                        val supportMapFragment =
+                            supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+                        supportMapFragment!!.getMapAsync(this@MapsActivity)
+
+                        supportMapFragment.getMapAsync {
+                            addMarkers()
+                            mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this@MapsActivity))
+                        }
+                    }
                 }
 
                 override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {

@@ -14,10 +14,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.android.gms.maps.model.*
@@ -67,7 +65,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         mAuth = FirebaseAuth.getInstance()
         userID = mAuth.currentUser!!.uid
-        Log.d("UserIDs:", userID)
         mDatabase = FirebaseDatabase.getInstance().getReference("Trace")
 
         var ref = FirebaseDatabase.getInstance().getReference("Trace").child(userID)
@@ -75,7 +72,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         val menuListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 traceDays = dataSnapshot //gets the location at different times of each day
-                Log.d("TD----------------:", "traceDays: " + traceDays.getValue())
             }
             override fun onCancelled(databaseError: DatabaseError) {
                 // handle error
@@ -101,10 +97,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                 return@setOnDateChangeListener;
             }
             val days = traceDays.child(year.toString() + "-" + (month + 1).toString() + "-" + this.dayOfMonth)
-            Log.d(
-                "onDateChangeListener",
-                "got   " + days
-            )
+
             if(days.value==null){
                 Toast.makeText(this@TraceActivity, "Theres no recorded trace master!EXITTTINGG", Toast.LENGTH_SHORT).show()
                 return@setOnDateChangeListener;
@@ -115,11 +108,9 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             var posList:ArrayList<LatLng> = ArrayList()
             //add the markers at each (time, location) combo for each child
             markers.forEach {
-                Log.d("Markers:",it.toString())
                 val strMarker = it.value.toString()
                 val Lng = strMarker.substringAfter("Lng=").substringBefore(",").toDouble()
                 val Lat = strMarker.substringAfter("Lat=").substringBefore("}").toDouble()
-                Log.d("LatLng:",Lat.toString()+","+Lng)
                 val pos = LatLng(Lat,Lng)
                 val marker = mMap.addMarker(MarkerOptions().position(pos).title(it.key.toString()))
                 //fitting all markers
@@ -152,7 +143,6 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
         attachments = intent.getSerializableExtra("places") as ArrayList<Place>
         places = attachments.toCollection(ArrayList())
-        Log.d("extras",places.toString())
 
         mMap = googleMap
 
@@ -170,7 +160,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         places.forEach { place ->
            when (place.alert_level) {
                1 -> {
-                   val marker = mMap.addMarker(
+                   mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
                            .position(LatLng(place.lat, place.lng))
@@ -179,7 +169,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                    )
                }
                2 -> {
-                   val marker = mMap.addMarker(
+                   mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
                            .position(LatLng(place.lat, place.lng))
@@ -188,7 +178,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                    )
                }
                3 -> {
-                   val marker = mMap.addMarker(
+                   mMap.addMarker(
                        MarkerOptions()
                            .title(place.name)
                            .position(LatLng(place.lat, place.lng))
@@ -197,12 +187,8 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
                    )
                }
            }
-
         }
         Log.i("AddMarker", "addMarkers completed")
     }
-
-
-
 }
 
