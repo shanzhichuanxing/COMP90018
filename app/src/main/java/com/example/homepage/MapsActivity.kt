@@ -70,6 +70,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private lateinit var cardView:CardView
     private lateinit var code:String
 
+    private lateinit var infoBtn:View
+    private lateinit var traceBtn:View
+
 
     private lateinit var levelThreeBtn:View
     private lateinit var levelTwoBtn:View
@@ -115,9 +118,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
 
 
         //searchBar=findViewById(R.id.searchBar)
+        infoBtn=findViewById(R.id.infoMenu)
+        traceMenuButton=findViewById(R.id.traceMenu)
         searchText=findViewById(R.id.searchBox)
         searchIcon=findViewById(R.id.search)
         cardView=findViewById(R.id.cardView)
+
+        infoBtn.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this@MapsActivity, InfoActivity::class.java)
+            startActivity(intent)
+        })
 
         if (isPermissionGranted)
         {

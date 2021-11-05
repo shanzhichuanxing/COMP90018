@@ -98,38 +98,7 @@
             app:srcCompat="@drawable/relocate"
             app:tint="@null" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/traceMenu"
-            android:layout_width="55dp"
-            android:layout_height="56dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="460dp"
-            android:clickable="true"
-            android:visibility="invisible"
-            app:backgroundTint="@color/blue_dark"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/include"
-            app:layout_constraintVertical_bias="0.916"
-            app:srcCompat="@drawable/ic_track_white"
-            app:tint="@null" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/info"
-            android:layout_width="55dp"
-            android:layout_height="56dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="480dp"
-            android:clickable="true"
-            android:visibility="invisible"
-            app:backgroundTint="@color/blue_dark"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/include"
-            app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_baseline_info_24"
-            app:tint="@null" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 <!--    <include layout="@layout/marker_info_contents" />-->

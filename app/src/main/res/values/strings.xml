@@ -20,10 +20,34 @@
     <string name="or_text">Or</string>
     <string name="create_account_text">CREATE ACCOUNT</string>
     <string name="info_title">COVID INFORMATION</string>
-    <string name="info_text">"Symptoms of COVID-19 can range from mild illness to pneumonia. Some people will recover easily, and others may get very sick very quickly. People with coronavirus may experience symptoms such as:  fever respiratory symptoms coughing sore throat shortness of breath. Other symptoms can include runny nose, acute blocked nose (congestion), headache, muscle or joint pains, nausea, diarrhoea, vomiting, loss of sense of smell, altered sense of taste, loss of appetite and fatigue.  "</string>
+
+
     <string name="symptoms">Symptoms</string>
     <string name="Protect">Protect yourself and others</string>
-    <string name="protect_text">Wash your hands often with soap and water.
-        This includes before and after eating and after going to the toilet use alcohol-based hand sanitisers when you can’t use soap and water avoid touching your eyes, nose and mouth clean and disinfect surfaces you use often such as benchtops, desks and doorknobs clean and disinfect objects you use often such as mobile phones, keys, wallets and work passes increase the amount of fresh air by opening windows or changing air conditioning</string>
+
+
+
+    <string name="symptomsM">Most common symptoms:</string>
+    <string name="symptomsM1">•	Fever</string>
+    <string name="symptomsM2">•	Cough</string>
+    <string name="symptomsM3">•	Tiredness</string>
+    <string name="symptomsM4">•	Loss of taste or smell</string>
+    <string name="symptomsL">Less common symptoms</string>
+    <string name="symptomsL1">•	Sore throat</string>
+    <string name="symptomsL2">•	Headache</string>
+    <string name="symptomsL3">•	Aches and pains</string>
+    <string name="symptomsL4">• Diarrhoea</string>
+    <string name="symptomsL5">•	A rash on skin, or discolouration of fingers or toes</string>
+    <string name="symptomsL6">•	Red or irritated eyes</string>
+
+    <string name="sy">Serious Symptoms</string>
+    <string name="sy1">•	difficulty breathing or shortness of breath</string>
+    <string name="sy2">•	loss of speech or mobility, or confusion</string>
+    <string name="sy3">•	chest pain</string>
+
+    <string name="info_suggest">Seek immediate medical attention if you have serious symptoms. Always call before visiting your doctor or health facility.</string>
+    <string name="info_suggest1">If you experienced any side effect or suspect whether you have experienced any side effect of your vaccination, please visit the link below to proceed to a free Australian health check.
+</string>
+    <string name="txtCredi">https://www.healthdirect.gov.au/symptom-checker/tool/basic-details</string>
 
 </resources>
