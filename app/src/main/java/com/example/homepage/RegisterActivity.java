@@ -1,5 +1,16 @@
 package com.example.homepage;
 
+/***************************************************************************************************************************************************
+ * Author: Rishav Kumar, Heramba Panda
+ * Date: Jan 30, 2020
+ * Title of program/source code: Firebase Demo
+ * Code version: v2
+ * Type: source code
+ * Web address or publisher: https://github.com/rishavk1102/FirebaseDemo/blob/Project/app/src/main/java/com/rishav/firebasedemo/RegisterActivity.java
+ *****************************************************************************************************************************************************/
+
+
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -80,8 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
                         pd.dismiss();
-                        Toast.makeText(RegisterActivity.this, "Update the profile " +
-                                "for better expereince", Toast.LENGTH_SHORT).show();
+                      
                         Intent intent = new Intent(RegisterActivity.this , MapsActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
