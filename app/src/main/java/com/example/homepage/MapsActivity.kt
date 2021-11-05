@@ -46,6 +46,12 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import com.google.android.gms.maps.model.LatLng
+
+import com.google.android.gms.maps.model.MarkerOptions
+
+
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val  rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open) }
@@ -113,19 +119,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         cardView=findViewById(R.id.cardView)
 
         infoBtn.setOnClickListener {
-            if (mMap == null) {
-                Log.d("infoBtn","Map not ready yet")
-                return@setOnClickListener
-            }
             val intent = Intent(this@MapsActivity, InfoActivity::class.java)
             startActivity(intent)
         }
 
         searchIcon.setOnClickListener {
-            if (mMap == null) {
-                Log.d("searchIcon","Map not ready yet")
-                return@setOnClickListener
-            }
             var searchTxt: String = searchText.getText().toString().trim()
             var addressList: List<Address>? = null
 
@@ -133,11 +131,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 val geocoder = Geocoder(this@MapsActivity)
                 try {
                     addressList = geocoder.getFromLocationName(searchTxt, 1)
+                    val address = addressList?.get(0)
+                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                        address?.let { it1 -> LatLng(it1.latitude, address.longitude) }, 15f)
+                    mMap.moveCamera(cameraUpdate)
+                    mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
                 } catch (e: NumberFormatException) {
                     e.printStackTrace()
                 }
-                val address = addressList?.get(0)
-                address?.let { it1 -> gotoLocation(it1.latitude, address.longitude) }
             }
         }
 
@@ -149,10 +150,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
 
         traceMenuButton.setOnClickListener {
-            if (mMap == null) {
-                Log.d("traceMenuButton","Map not ready yet")
-                return@setOnClickListener
-            }
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
             intent.apply {
                 putExtra("places", places)
@@ -160,11 +157,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             startActivity(intent)
         }
         reCenterButton.setOnClickListener{
-            if (mMap == null) {
-                Log.d("reCenterButton","Map not ready yet")
-                return@setOnClickListener
-            }
-
             if (mCurrentLocation == null) {
                 Log.d("reCenterButton","Null current location")
                 return@setOnClickListener
@@ -175,7 +167,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             },15f))
         }
         layerButton.setOnClickListener{
-
             onAddButtonClicked()
         }
 
@@ -210,11 +201,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
         if(show){
             Toast.makeText(this, "Showing tier $tier exposure sites",Toast.LENGTH_SHORT).show()
-            rebounds(tierMarkerList,mMap)
         }else{
             Toast.makeText(this, "Hiding tier $tier exposure sites",Toast.LENGTH_SHORT).show()
         }
 
+        rebounds(tierMarkerList,mMap)
     }
     /**
      *Resets camera view to bound all tier markers in a list
@@ -383,16 +374,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                         .show()
                     isPermissionGranted = true
                     getLocationUpdates()
-                    if (isPermissionGranted)
-                    {
-                        val supportMapFragment =
-                            supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-                        supportMapFragment!!.getMapAsync(this@MapsActivity)
+                    val supportMapFragment =
+                        supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+                    supportMapFragment!!.getMapAsync(this@MapsActivity)
 
-                        supportMapFragment.getMapAsync {
-                            addMarkers()
-                            mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this@MapsActivity))
-                        }
+                    supportMapFragment.getMapAsync {
+                        addMarkers()
+                        mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this@MapsActivity))
                     }
                 }
 
@@ -412,6 +400,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 }
             }).check()
     }
+
     private fun isGPSEnabled(): Boolean {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager?;
         var providerEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -423,15 +412,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
         return false;
     }
-    private fun gotoLocation(latitude: Double, longitude: Double) {
-        val latLng = LatLng(latitude, longitude)
-        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
-        mMap.moveCamera(cameraUpdate)
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-    }
+
     @SuppressLint("MissingPermission")
     private fun getLocationUpdates() {
-        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager?
         locationManager!!.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
             30000,
@@ -449,12 +433,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             val lat = location.latitude
             val lng = location.longitude
             mCurrentLocation = location
-            Toast.makeText(
-                this,
-                "Location: " + location.latitude + ", " + location.longitude + ", " + time,
-                Toast.LENGTH_SHORT
-            ).show()
-
             mDatabase!!.child(userID!!).child(date).child(time).child("Lat").setValue(lat)
             mDatabase!!.child(userID!!).child(date).child(time).child("Lng").setValue(lng)
         } catch (e: ParseException) {
@@ -462,5 +440,3 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
     }
 }
-
-
