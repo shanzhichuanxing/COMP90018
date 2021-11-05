@@ -21,6 +21,7 @@
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/drawable-anydpi/tier2.xml" value="0.15989583333333332" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/drawable-anydpi/tier3.xml" value="0.15989583333333332" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_case_alert.xml" value="0.275" />
+        <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_info.xml" value="0.14270833333333333" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_maps.xml" value="0.36" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/activity_start.xml" value="0.275" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/content_case_alert.xml" value="0.14375" />
@@ -34,12 +35,6 @@
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/layout/trace_maps.xml" value="0.4" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.15989583333333332" />
         <entry key="..\:/Users/cheng/OneDrive/Documents/study_materials/COMP90018/Project/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.15989583333333332" />
-        <entry key="app/src/main/res/layout/activity_info.xml" value="0.5729804908767745" />
-        <entry key="app/src/main/res/layout/activity_login.xml" value="0.24003623188405798" />
-        <entry key="app/src/main/res/layout/activity_maps.xml" value="0.3207810731630641" />
-        <entry key="app/src/main/res/layout/floating_searchbar.xml" value="0.6734051940421584" />
-        <entry key="app/src/main/res/layout/marker_info_contents.xml" value="0.19635416666666666" />
-        <entry key="app/src/main/res/layout/trace_maps.xml" value="0.34791666666666665" />
       </map>
     </option>
   </component>
