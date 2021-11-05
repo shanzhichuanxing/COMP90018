@@ -77,9 +77,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private lateinit var layerButton:View
     private lateinit var traceMenuButton:View
     private lateinit var reCenterButton:View
-
-    var isPermissionGranted = false
-
+    
     var locationManager: LocationManager? = null
     private var mDatabase: DatabaseReference? = null
     private var mAuth: FirebaseAuth? = null
@@ -372,7 +370,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                 override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
                     Toast.makeText(this@MapsActivity, "Permission Granted", Toast.LENGTH_SHORT)
                         .show()
-                    isPermissionGranted = true
                     getLocationUpdates()
                     val supportMapFragment =
                         supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
