@@ -14,6 +14,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.example.homepage.databinding.ActivityMapsBinding
+import com.example.homepage.model.Place
+import com.example.homepage.utils.BitmapHelper
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.android.gms.maps.model.*
@@ -33,6 +37,20 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dayOfMonth: String
 
     private lateinit var traceDays: DataSnapshot
+    private lateinit var attachments: ArrayList<Place>
+    private lateinit var places: ArrayList<Place>
+
+    private val alertOneIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
+    }
+
+    private val alertTwoIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier2)
+    }
+
+    private val alertThreeIcon: BitmapDescriptor by lazy {
+        BitmapHelper.vectorToBitmap(this, R.drawable.tier3)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -70,6 +88,7 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
             mMap.clear()
+            addMarkers()
             this.year = year.toString()
             this.month = month.toString()
             this.dayOfMonth = dayOfMonth.toString()
@@ -114,16 +133,8 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             .addAll(
                 posList))
             polyline1.tag = "A"
-
             //resizing to fit all markers
-            val b = LatLngBounds.Builder()
-            for (m in markerList) {
-                b.include(m.position)
-            }
-
-            val bounds = b.build()
-            val cu = CameraUpdateFactory.newLatLngBounds(bounds, 200, 200, 30)
-            mMap.animateCamera(cu)
+            MapsActivity().rebounds(markerList,mMap)
 
         }
     }
@@ -138,13 +149,60 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(googleMap: GoogleMap) {
+
+        attachments = intent.getSerializableExtra("places") as ArrayList<Place>
+        places = attachments.toCollection(ArrayList())
+        Log.d("extras",places.toString())
+
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(melbourne,15f))
-
+        addMarkers()
     }
+    /**
+     * Adds marker representations of the places list on the provided GoogleMap object
+     */
+    private fun addMarkers() {
+
+        places.forEach { place ->
+           when (place.alert_level) {
+               1 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(LatLng(place.lat, place.lng))
+                           .icon(alertOneIcon)
+                           .visible(true)
+                   )
+               }
+               2 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(LatLng(place.lat, place.lng))
+                           .icon(alertTwoIcon)
+                           .visible(true)
+                   )
+               }
+               3 -> {
+                   val marker = mMap.addMarker(
+                       MarkerOptions()
+                           .title(place.name)
+                           .position(LatLng(place.lat, place.lng))
+                           .icon(alertThreeIcon)
+                           .visible(true)
+                   )
+               }
+           }
+
+        }
+        Log.i("AddMarker", "addMarkers completed")
+    }
+
+
+
 }
 

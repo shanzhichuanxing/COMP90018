@@ -16,24 +16,20 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.example.homepage.databinding.ActivityMapsBinding
 import com.example.homepage.model.Place
 import com.example.homepage.utils.BitmapHelper
 import com.example.homepage.utils.MarkerInfoWindowAdapter
 import com.google.android.gms.location.*
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.*
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -89,7 +85,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var userID: String? = null
     private var mCurrentLocation: Location? = null
     var myMarkers = ArrayList<Marker>()
-
+    var myMarkerOptions = ArrayList<MarkerOptions>()
 
     private val alertOneIcon: BitmapDescriptor by lazy {
         BitmapHelper.vectorToBitmap(this, R.drawable.tier1)
@@ -175,6 +171,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
         traceMenuButton.setOnClickListener(View.OnClickListener {
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
+            intent.apply {
+                putExtra("places", places)
+            }
             startActivity(intent)
         })
         reCenterButton.setOnClickListener{
@@ -192,41 +191,67 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
 
         levelOneBtn.setOnClickListener{
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 1) {
-                    marker.isVisible = !marker.isVisible
-                }
-            }
-            Toast.makeText(this, "levelOne Clicked",Toast.LENGTH_SHORT).show()
+            buttonTierResponse(1)
         }
         levelTwoBtn.setOnClickListener{
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 2) {
-                    marker.isVisible = !marker.isVisible
-                }
-            }
-            Toast.makeText(this, "levelTwo Clicked",Toast.LENGTH_SHORT).show()
+            buttonTierResponse(2)
         }
         levelThreeBtn.setOnClickListener{
-            myMarkers.forEach { marker ->
-                var place = marker.tag as Place
-                if (place.alert_level == 3) {
-                    marker.isVisible = !marker.isVisible
-
-                }
-            }
-            Toast.makeText(this, "levelThree Clicked",Toast.LENGTH_SHORT).show()
+           buttonTierResponse(3)
         }
-    }
 
+    }
+    /**
+     *Logic for every exposure tier button.hides/shows button. rebounds at the end
+     */
+    private fun buttonTierResponse(tier:Int){
+        var tierMarkerList = ArrayList<Marker>()
+        var show = false
+        myMarkers.forEach { marker ->
+            var place = marker.tag as Place
+            if (place.alert_level == tier) {
+                marker.isVisible = !marker.isVisible
+                tierMarkerList.add(marker)
+                if(marker.isVisible)show=true
+            }
+        }
+        if(tierMarkerList.size == 0){
+            Toast.makeText(this, "No tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+            return
+        }
+        if(show){
+            Toast.makeText(this, "Showing tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(this, "Hiding tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+        }
+
+        rebounds(tierMarkerList,mMap)
+    }
+    /**
+     *Resets camera view to bound all tier markers in a list
+     */
+    fun rebounds(tierMarkerList: ArrayList<Marker>, mMap:GoogleMap){
+        val b = LatLngBounds.Builder()
+        for (m in tierMarkerList) {
+            b.include(m.position)
+        }
+
+        val bounds = b.build()
+        val cu = CameraUpdateFactory.newLatLngBounds(bounds, 800, 800, 10)
+        mMap.animateCamera(cu)
+    }
+    /**
+     *Action for FAB tray
+     */
     private fun onAddButtonClicked() {
         setVisibility(clicked)
         setAnimation(clicked)
         clicked = !clicked
     }
 
+    /**
+     *Sets visibility for FAB
+     */
     private fun setVisibility(clicked: Boolean) {
 
         if(!clicked){
@@ -240,7 +265,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
 
     }
-
+    /**
+     *Sets animation for FAB
+     */
     private fun setAnimation(clicked: Boolean) {
 
         if(!clicked){
@@ -304,29 +331,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertOneIcon)
                             .visible(false)
                     )
                     marker.tag = place
                     myMarkers.add(marker)
+
                 }
                 2 -> {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertTwoIcon)
                             .visible(false)
                     )
                     marker.tag = place
                     myMarkers.add(marker)
+
                 }
                 3 -> {
                     val marker = mMap.addMarker(
                         MarkerOptions()
                             .title(place.name)
-                            .position(place.latLng)
+                            .position(LatLng(place.lat, place.lng))
                             .icon(alertThreeIcon)
                             .visible(false)
 
@@ -335,6 +364,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     // MarkerInfoWindowAdapter
                     marker.tag = place
                     myMarkers.add(marker)
+
+
                 }
 
             }
@@ -415,7 +446,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         try {
 
             val array = getGPSLocalTime(location.time)
-            val date = "2021-11-01"
+            val date = array[0]
             val time = array[1]
             val lat = location.latitude
             val lng = location.longitude
