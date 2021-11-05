@@ -113,11 +113,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         cardView=findViewById(R.id.cardView)
 
         infoBtn.setOnClickListener {
+            if (mMap == null) {
+                Log.d("infoBtn","Map not ready yet")
+                return@setOnClickListener
+            }
             val intent = Intent(this@MapsActivity, InfoActivity::class.java)
             startActivity(intent)
         }
 
         searchIcon.setOnClickListener {
+            if (mMap == null) {
+                Log.d("searchIcon","Map not ready yet")
+                return@setOnClickListener
+            }
             var searchTxt: String = searchText.getText().toString().trim()
             var addressList: List<Address>? = null
 
@@ -141,6 +149,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         traceMenuButton = findViewById(R.id.traceMenu)
 
         traceMenuButton.setOnClickListener {
+            if (mMap == null) {
+                Log.d("traceMenuButton","Map not ready yet")
+                return@setOnClickListener
+            }
             val intent = Intent(this@MapsActivity, TraceActivity::class.java)
             intent.apply {
                 putExtra("places", places)
@@ -148,6 +160,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             startActivity(intent)
         }
         reCenterButton.setOnClickListener{
+            if (mMap == null) {
+                Log.d("reCenterButton","Map not ready yet")
+                return@setOnClickListener
+            }
+
             if (mCurrentLocation == null) {
                 Log.d("reCenterButton","Null current location")
                 return@setOnClickListener
@@ -158,6 +175,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             },15f))
         }
         layerButton.setOnClickListener{
+
             onAddButtonClicked()
         }
 
@@ -192,11 +210,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         }
         if(show){
             Toast.makeText(this, "Showing tier $tier exposure sites",Toast.LENGTH_SHORT).show()
+            rebounds(tierMarkerList,mMap)
         }else{
             Toast.makeText(this, "Hiding tier $tier exposure sites",Toast.LENGTH_SHORT).show()
         }
 
-        rebounds(tierMarkerList,mMap)
     }
     /**
      *Resets camera view to bound all tier markers in a list
@@ -365,7 +383,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                         .show()
                     isPermissionGranted = true
                     getLocationUpdates()
-
                     if (isPermissionGranted)
                     {
                         val supportMapFragment =

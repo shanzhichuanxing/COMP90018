@@ -81,8 +81,8 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
 
         calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
-            val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
-            Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
+//            val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
+//            Toast.makeText(this@TraceActivity, msg, Toast.LENGTH_SHORT).show()
             mMap.clear()
             addMarkers()
             this.year = year.toString()
@@ -93,13 +93,13 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             //read database
             if(!(this::traceDays.isInitialized)){
-                Toast.makeText(this@TraceActivity, "We haven't gotten the data yet!PLease wait and try again master!BZZ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TraceActivity, "Database isn't connected", Toast.LENGTH_SHORT).show()
                 return@setOnDateChangeListener;
             }
             val days = traceDays.child(year.toString() + "-" + (month + 1).toString() + "-" + this.dayOfMonth)
 
             if(days.value==null){
-                Toast.makeText(this@TraceActivity, "Theres no recorded trace master!EXITTTINGG", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@TraceActivity, "Theres no recorded trace master!EXITTTINGG", Toast.LENGTH_SHORT).show()
                 return@setOnDateChangeListener;
             }
             val markers = days!!.children // all the markers in a single day
@@ -145,7 +145,9 @@ class TraceActivity : AppCompatActivity(), OnMapReadyCallback {
         places = attachments.toCollection(ArrayList())
 
         mMap = googleMap
-
+        mMap.uiSettings.isMyLocationButtonEnabled = false
+        mMap.uiSettings.isMapToolbarEnabled = false
+        mMap.uiSettings.isIndoorLevelPickerEnabled = false
         // Add a marker in Sydney and move the camera
         val melbourne = LatLng(-37.8116, 144.9646)
 
