@@ -1,5 +1,14 @@
 package com.example.homepage;
 
+/**************************************************************************************************************************************************
+ * Author: Rishav Kumar, Heramba Panda
+ * Date: Jan 30, 2020
+ * Title of program/source code: Firebase Demo
+ * Code version: v2
+ * Type: source code
+ * Web address or publisher: https://github.com/rishavk1102/FirebaseDemo/blob/Project/app/src/main/java/com/rishav/firebasedemo/LoginActivity.java
+ ***************************************************************************************************************************************************/
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -40,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
             String txt_password = password.getText().toString();
 
             if (TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
-                Toast.makeText(LoginActivity.this, "Empty Credentials!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Please fill out fields!", Toast.LENGTH_SHORT).show();
             } else {
                 loginUser(txt_email , txt_password);
             }
@@ -51,8 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth.signInWithEmailAndPassword(email , password).addOnCompleteListener(task -> {
             if (task.isSuccessful()){
-                Toast.makeText(LoginActivity.this, "Update the profile " +
-                        "for better expereince", Toast.LENGTH_SHORT).show();
+              
                 Intent intent = new Intent(LoginActivity.this , MapsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
