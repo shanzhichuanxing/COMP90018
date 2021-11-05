@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ public class InfoActivity extends AppCompatActivity {
 
        // info_link.setMovementMethod(LinkMovementMethod.getInstance());
         info_link = findViewById(R.id.info_link);
+
         info_link.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

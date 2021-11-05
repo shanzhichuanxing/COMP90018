@@ -18,5 +18,7 @@
     <color name="white_background">#f5f4ed</color>
     <color name="blue_dark">#204E82</color>
     <color name="white_road">#F2DACB</color>
+    <color name="link">#0B0080</color>
+
 
 </resources>
