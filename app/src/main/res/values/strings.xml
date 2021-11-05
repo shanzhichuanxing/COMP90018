@@ -48,6 +48,6 @@
     <string name="info_suggest">Seek immediate medical attention if you have serious symptoms. Always call before visiting your doctor or health facility.</string>
     <string name="info_suggest1">If you experienced any side effect or suspect whether you have experienced any side effect of your vaccination, please visit the link below to proceed to a free Australian health check.
 </string>
-    <string name="txtCredi">https://www.healthdirect.gov.au/symptom-checker/tool/basic-details</string>
+    <string name="txtCredi">https://www.healthdirect.gov.au/symptom-checker/tool/basic-details <u>underline</u> </string>
 
 </resources>

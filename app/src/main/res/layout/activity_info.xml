@@ -248,14 +248,18 @@
         android:id="@+id/info_link"
         android:layout_width="370dp"
         android:layout_height="21dp"
-        android:layout_marginStart="10dp"
-        android:textColor="@color/blue_dark"
-        android:text="@string/txtCredi"
+        android:layout_marginStart="8dp"
         android:clickable="true"
+        android:selectAllOnFocus="false"
+        android:linksClickable="false"
+        android:autoLink="all"
+        android:text="@string/txtCredi"
+        android:textColorLink="@color/link"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/info_text1"
-        app:layout_constraintVertical_bias="0.125" />
+        app:layout_constraintVertical_bias="0.111" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

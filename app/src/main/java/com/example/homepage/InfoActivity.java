@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class InfoActivity extends AppCompatActivity {
     private FloatingActionButton infoBack;
-
+    //TextView info_link = (TextView) findViewById(R.id.info_link);
     private View info_link;
 
     @Override
@@ -19,7 +22,9 @@ public class InfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
 
+       // info_link.setMovementMethod(LinkMovementMethod.getInstance());
         info_link = findViewById(R.id.info_link);
+
         info_link.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -27,6 +32,7 @@ public class InfoActivity extends AppCompatActivity {
                 startActivity(openURL);
             }
         });
+
 
        infoBack= findViewById(R.id.infoMenuBack);
        infoBack.setOnClickListener(new View.OnClickListener() {
@@ -36,4 +42,6 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
     }
+
+
 }
